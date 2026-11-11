@@ -1,0 +1,1115 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Earth Hazard Lab</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0e161b"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Hazard Lab"><link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png">
+<style>
+:root{--bg:#f3f0e8;--pn:#fffdf8;--ink:#1c2830;--mu:#66767f;--ln:#d8d2c3;--ac:#c2410c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0e161b;--pn:#16222a;--ink:#e5ecef;--mu:#8da1ab;--ln:#293a44;--ac:#fb923c}}
+:root[data-theme=dark]{--bg:#0e161b;--pn:#16222a;--ink:#e5ecef;--mu:#8da1ab;--ln:#293a44;--ac:#fb923c}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:13px/1.35 system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 10px;background:var(--pn);border-bottom:1px solid var(--ln)}
+header b{font-size:15px;margin-right:auto}
+label{display:block;color:var(--mu)}label b{color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--ac)}
+.seg{display:flex}.seg button,.row button{border:1px solid var(--ln);background:var(--pn);color:var(--ink);padding:6px 10px;font:inherit}
+.seg button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+#map{flex:1;position:relative;min-height:150px;background:#0a1d2e}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+#info{position:absolute;left:6px;bottom:6px;right:6px;background:#000a;color:#fff;padding:3px 7px;border-radius:5px;font-size:11px;pointer-events:none}
+#ld{position:absolute;inset:0;display:grid;place-items:center;color:#fff;background:#0a1d2e}
+#pan{background:var(--pn);border-top:1px solid var(--ln);padding:8px 10px;max-height:44vh;overflow:auto}
+.ctl{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin:8px 0}.hide{display:none}
+.row{display:flex;gap:8px;align-items:end}.row label{flex:1}.row button{padding:7px 12px}
+#bn{pointer-events:none;position:absolute;top:6px;left:6px;right:6px;background:#c1121f;color:#fff;padding:5px 8px;border-radius:5px;font-weight:600;font-size:12px}#tip{position:absolute;pointer-events:none;background:#000d;color:#fff;padding:3px 7px;border-radius:5px;font-size:11px;max-width:240px;display:none;z-index:3}#nv{display:none}
+body.nerv{--bg:#0b1118;--pn:#111b26;--ink:#e8eef4;--mu:#8ea1b3;--ln:#243444;--ac:#ff5a4d}
+body.nerv header label,body.nerv header .seg{display:none}
+body.nerv #pan>:not(#nv){display:none}
+body.nerv #info,body.nerv #tip,body.nerv #cp{display:none!important}
+body.nerv #pan{max-height:50vh}
+#nvb{border:1px solid var(--ac);background:var(--pn);color:var(--ac);padding:5px 10px;font:inherit;font-weight:600;border-radius:8px}
+body.nerv #nv{display:block;background:#131f2b;border:1px solid #243444;border-radius:12px;padding:10px 12px}
+.nvh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}
+#nvbig{font-size:38px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:4px}
+#nvsub{font-size:13px}#nvev{font-size:12px;color:var(--mu);margin-top:4px}
+.nr{display:grid;grid-template-columns:1fr 2.2fr;gap:8px;font-size:12px;padding:5px 0;border-top:1px solid #243444}
+.nvf{margin-top:8px;font-size:11px;color:var(--mu)}
+body.nv-alert #nv{border-color:#ff5a4d;animation:nvg 1s ease-in-out infinite}body.nv-alert #nvbig{color:#ff5a4d}
+@keyframes nvg{50%{box-shadow:0 0 0 3px #ff5a4d55}}
+body.nerv #bn{background:#b42318!important;color:#fff!important;border-radius:8px}
+details{margin-top:8px}summary{cursor:pointer;color:var(--mu)}#legend{position:absolute;right:7px;top:7px;z-index:2;background:#071521d9;color:#f4f7fa;border:1px solid #ffffff35;border-radius:7px;padding:6px 8px;font-size:10px;line-height:1.55;pointer-events:none;max-width:170px}#legend .sw{display:inline-block;width:15px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}body.nerv #legend{display:none}@keyframes bk{50%{opacity:.2}}#bn.blink,#nvbig.blink{animation:bk .8s steps(1,end) infinite}#bn.blink3,#nvbig.blink3{animation:bk .4s steps(1,end) infinite}#evw{display:block;margin:8px 0 2px;color:var(--mu)}#evsel{width:100%;margin-top:3px}#gw select{margin-left:6px}#pb{font-size:12px;margin-top:6px;padding:6px 8px;border:1px solid var(--ln);border-radius:6px}#pb:empty{display:none}#eew{font-size:12px;margin-top:6px}#hint{color:var(--mu);font-size:12px;margin-top:6px}#rep{margin-top:6px;font-size:12px}
+</style></head><body>
+<header><b id="ttl">Earth Hazard Lab</b><button id="nvb">EEW console</button>
+<div class="seg" id="lay"><button class="on" data-l="0">Terrain</button><button data-l="1">Climate</button></div>
+<label><input type="checkbox" id="fl" checked> Faults</label><label><input type="checkbox" id="ct" checked> Cities</label><label><input type="checkbox" id="vr" checked> Rivers &amp; volcanoes</label><label><input type="checkbox" id="al" checked> Alerts</label><label><input type="checkbox" id="rd"> Touch read mode</label></header>
+<div id="map"><div id="modeb" style="position:fixed;top:8px;left:8px;z-index:9;padding:3px 9px;border-radius:12px;font:bold 11px system-ui;letter-spacing:.04em;pointer-events:none;background:#ffb020;color:#000;border:1.5px solid #000">SIMULATION</div><canvas id="cv"></canvas><div id="legend"><b>Map key</b><br><span class="sw" style="background:#ff3d5a"></span>Subduction fault<br><span class="sw" style="background:#ffb020"></span>Transform fault<br><span class="sw" style="background:#ff7a1a"></span>Convergent fault<br><span class="sw" style="background:#b36bff"></span>Rift / ridge<br><span class="sw" style="background:#4cc9f0"></span>P-wave front<br><span class="sw" style="background:#ff9f1c"></span>S-wave front</div><div id="info">Tap the map for local data</div><div id="bn" style="display:none"></div><div id="tip"></div><div id="ld">Building Earth…</div></div>
+<section id="pan"><div id="nv"><div class="nvh"><span id="nvst">Monitoring</span><span id="nvnet"></span></div><label id="evw">Show event<select id="evsel"><option value="all">All events (overlapping)</option></select></label><div id="nvbig">All quiet</div><div id="nvsub"></div><div id="nvev"></div><div id="nvls"></div><div class="nvf">Simulation only. Fictional alert system, not an official warning.</div></div>
+<div class="seg" id="mode"><button class="on" data-m="q">Earthquake</button><button data-m="r">Rain / Flood</button></div>
+<div id="cq" class="ctl"><label>Magnitude <b id="mv">7.5</b><input type="range" id="mag" min="5" max="9.5" step=".1" value="7.5"></label>
+<label>Focal depth <b id="zv">15</b> km<input type="range" id="depth" min="5" max="300" step="5" value="15"></label><div><label><input type="checkbox" id="snap" checked> Snap to nearest fault</label><label><input type="checkbox" id="ts" checked> Tsunami if offshore</label></div></div>
+<div id="cr" class="ctl hide"><label>Rain <b id="iv">40</b> mm/h<input type="range" id="rate" min="5" max="200" value="40"></label>
+<label>Radius <b id="rv">500</b> km<input type="range" id="rad" min="100" max="2000" step="50" value="500"></label>
+<label>Duration <b id="dv">48</b> h<input type="range" id="dur" min="6" max="240" value="48"></label></div>
+<div class="row"><label>Time speed <b id="sv">1× (real time)</b><input type="range" id="spd" min="0" max="11" value="0"></label><button id="pp">Pause</button><button id="rs">Reset</button></div><div class="row"><label>Warning sound<select id="ws" style="width:100%"></select></label><button id="wp">Test sound</button></div><div class="row"><label><input type="checkbox" id="snd" checked> Sounds</label><label><input type="checkbox" id="tts" checked> Voice</label><button id="wv">Test voice</button></div>
+<details open><summary>Quake sequences and random earthquakes</summary><div class="ctl"><label><input type="checkbox" id="rq"> Random earthquakes</label><label><input type="checkbox" id="db"> Doublets</label><label><input type="checkbox" id="uq" checked> Urban-hit quakes (shallow, near cities)</label>
+<label>Strength <b id="rqsv">0.40</b><input type="range" id="rqs" min="0" max="1" step=".01" value=".4"></label><label>Frequency <b id="rqfv">0.30</b><input type="range" id="rqf" min="0" max="1" step=".01" value=".3"></label>
+<label><input type="checkbox" id="fsh"> Foreshocks before the mainshock</label><label><input type="checkbox" id="ash" checked> Aftershocks</label><label><input type="checkbox" id="as6" checked> Suppress aftershocks below M6</label></div></details>
+<details><summary>Home location</summary><div class="ctl"><label>Nearest city<select id="hc" style="width:100%"></select></label><div class="row"><button id="hmap">Pick on map</button><button id="hclr">Clear</button></div><div id="hinfo" style="font-size:12px;opacity:.8">No home set. Alerts then use only how significant the quake is.</div></div></details>
+<details><summary>Live tracking (USGS)</summary><div class="ctl"><label><input type="checkbox" id="lv"> Track real earthquakes live</label><label>Minimum magnitude<select id="lvm" style="width:100%"><option value="significant">Significant events only</option><option value="4.5" selected>M4.5 and up</option><option value="2.5">M2.5 and up (many)</option></select></label><label><input type="checkbox" id="lvh"> Hide unverified (automatic, not yet reviewed) quakes</label><div id="lvl" style="max-height:220px;overflow:auto;font-size:12px"></div><div id="lvs" style="font-size:12px;opacity:.8">Off. Real quakes from the USGS feed appear on the map and drive the EEW console in real time. Alerts and tsunami forecasts shown here are simulations built on USGS data, not official warnings.</div></div></details>
+<details><summary>Alerts on this device</summary><div class="ctl"><label><input type="checkbox" id="nt"> Notifications for real quakes (Live mode)</label><label><input type="checkbox" id="vb"> Vibrate on alerts</label><div class="row"><button id="ntest">Test alert</button></div><div id="nts" style="font-size:12px;opacity:.8">Notifications show when the app is in the background or another tab. Android: vibration works after your first tap. iPhone: add to Home Screen first; it does not support web vibration.</div></div></details>
+<details><summary>Warning sounds by scenario</summary><div id="scs" class="ctl"></div></details>
+<div id="hint">Click the map to place an epicenter. Fault traces are simplified geographic approximations; the Tohoku 2011 interface trace is a separate shallow megathrust reference, not the Japan Trench axis. Set focal depth to compare shallow and deep events. Offshore M6.8+ events may generate a tsunami. Hover anywhere to read elevation, wave heights and floods; on touch screens, tap. Drag to pan, scroll or pinch to zoom.</div><div id="pb"></div><canvas id="cp" width="600" height="80" style="width:100%;height:56px;display:none;margin-top:4px"></canvas><div id="eew"></div><div id="rep"></div><div id="bgp" style="font-size:12px;margin-top:6px"></div><div id="gw" class="hide"><label>Tide gauge<select id="gs"></select></label><canvas id="gc" width="600" height="90" style="width:100%;height:60px"></canvas></div>
+</section>
+<script>
+const RZ=4,HF=3,W=360*RZ,H=180*RZ,N=W*H,CS=111.2/RZ,sq=x=>x*x,$=id=>document.getElementById(id);
+const LAND=[`-168,66 -162,70 -156,71.5 -141,70 -128,70 -115,68 -95,72 -85,70 -82,66 -90,64 -94,59 -92,57 -85,55 -80,51 -78,56 -77,62 -70,61 -65,60 -62,56 -56,52 -60,47 -66,45 -70,43 -70,41.5 -74,40 -76,37 -76,35 -81,31 -80,26 -82,27 -84,30 -90,29 -94,29.5 -97,27 -97,22 -95,19 -91,19 -90,21 -87,21 -88,16 -84,15 -83,11 -80,9 -77,8.5 -80,7.5 -84,9 -86,12 -91,14 -96,15.5 -105,20 -109,25 -114,31 -117,33 -120,34.5 -122,37 -124,40 -124,46 -123,48.5 -127,51 -131,55 -135,58 -140,60 -148,60.5 -152,58 -158,56.5 -162,55 -158,58.5 -165,61 -165,64`,
+`-73,78 -60,82 -30,83 -20,80 -20,72 -25,68 -40,65 -44,60 -50,63 -54,68 -58,75`,
+`-80,73.5 -68,70 -62,66.5 -65,63 -72,64 -78,64.5 -74,68 -85,70`,`-90,76.5 -75,79 -62,82 -90,81.5`,
+`-77,8.5 -72,12 -64,10.5 -60,8.5 -52,5 -50,0 -44,-2.5 -35,-5.5 -35,-9 -39,-14 -39,-18 -41,-22 -48,-25.5 -49,-29 -53,-34 -58,-34.5 -57,-38 -62,-39 -65,-41 -64,-43 -67,-46 -66,-48 -69,-51 -69,-52.5 -68,-54.5 -72,-53 -75,-50 -74,-45 -73,-40 -71.5,-30 -70.5,-18 -76,-14 -81,-6 -80,-2 -80.5,0.5 -78,2.5`,
+`-17,21 -13,28 -9.5,30 -6,35.8 0,35.5 10,37.2 11,33 20,32 25,32 32,31 34,28 37,22 39,16 43,12 51,12 51,10 47,5 42,-1 40,-5 39.5,-10 40.5,-15 35,-20 35.5,-24 32.5,-28.5 28,-33 20,-34.8 18,-32 15,-27 12,-18 13.5,-12 12,-5 9,-1 9.5,4 5,6 -2,5 -8,4.5 -13,8 -15,11 -17,14.5 -16.5,19`,
+`-9,43 -9,37 -6,36.5 -2,36.7 0,38.5 3,42 6,43 9,44.3 12,42 16,38 16,40.5 18.5,40 13,44 12.5,45.5 15,45 19,42 20,40 23,36.5 26,37 30,36.5 36,36.5 35.5,34 35,32 34,31 34.5,29 35,28 39,21 43,14 45,12.8 52,16 57,19 59.5,22.5 56.5,26 54,24.5 51.5,24.5 51,26 50,26.5 48.5,29.5 48,30 50,30.2 52,27.5 56.5,27 57,25.5 61.5,25 66.5,25 70,21 72.8,19 74,15 77,8 78,9 80,15 80,16 85,20 87,21.5 90,22 92,20 94,16 97.5,16.5 98.5,13 98.3,8 100.5,3.5 103.5,1.3 104.2,1.5 103,5.5 100.5,7 100,12 101,12.7 103,11 105,8.5 107,10.5 109,12 109,15 106.5,18 106,20 108,21.5 110,21 114,22 117,23.5 119.5,26 121.5,29 122,31 120.5,34 119,37 122.5,37 121,39 122,40.5 125,39.5 126,37 126.5,34.5 129,35.2 129.5,37 128,39 130,42 133,43 136,44 140,48 141,52 137,54 142,59 150,59.5 155,59 156.5,57 156,51 158,52 162,55 163,60 170,60.5 178,63 180,65 180,68.5 170,70 160,69.5 150,71.5 140,72.5 130,71 113,73.5 105,77.5 100,76.5 95,76 87,75 80,73 80,68 73,68 69,73 66,69 60,69 55,68.5 44,68 40,67 33,69.5 28,71 20,70 15,68 12,65 8,63 5,61 5.5,58.5 8,58 10,57.7 8.2,55.5 8.8,54 9,53.5 7,53.5 5,53 4,51.5 2,51 1.5,50.5 -1.5,49.7 -4.5,48.5 -1.5,46 -1.5,44 -2,43.5`,
+`-5.5,50 1.5,51 1.5,53 -0.5,54 -2,56 -2,57.5 -3.5,58.6 -5,58.5 -6,56.5 -5,55 -3,54.5 -3,53.3 -4.5,53 -5,52 -3,51.5`,`-10,52 -6,52 -6,54.3 -8,55 -10,54`,`-24,65.5 -18,66.5 -14,65 -18,63.5 -22,63.8`,
+`130.9,34 131.8,34.6 133.2,35.5 134.8,35.6 136,35.7 136.2,36.2 136.7,37.2 137.3,37.5 137.1,36.8 138.3,37.2 139.4,38.2 139.9,39.5 140,40.6 140.8,41.2 141.2,40.9 141.5,40.3 141.9,39.2 141.5,38.3 141,37.2 140.9,36.3 140.6,35.7 140.1,35.2 139.8,35.1 139.9,35.5 139.6,35.3 139.1,34.9 138.8,34.7 138.3,34.6 137.2,34.6 136.9,34.7 136.8,34.3 136.3,33.8 135.8,33.5 135.1,33.5 135.1,34.3 134.9,34.6 133.4,34.4 132.3,34.2 131.4,34`,`140,41.5 140.2,42.5 140.5,43.2 141.4,43.3 141.7,44.6 142.2,45.4 143,44.4 144.5,44 145.4,43.3 145,42.9 143.4,42 142,42.3 141,42.6 140.4,42.1`,`130.9,33.9 131.9,33.6 131.5,32.5 131.3,31.4 130.6,31.2 130.2,31.3 130.2,32.5 129.8,33.1 130.3,33.6`,`132.5,33.9 133.6,34.3 134.6,34.2 134.2,33.5 133,32.8 132.4,33.3`,
+`120,18.5 122,18.5 122,14 124,13 126,7 125.5,5.8 122,7 123,10 121,13 120,16`,`95.5,5.5 98,4 104,-1 106,-3 106,-6 102,-4 98,0`,`105.3,-6.8 108,-6.5 114.5,-7.7 114,-8.5 106,-7.5`,
+`109,1.5 111,1.7 114,4.5 117,7 119,5 118,1 116,-3.5 114,-4 111,-3 110,-1.5`,`119.5,-5 120.5,1 125,1.5 121.5,0 123,-1 121.5,-4`,
+`131,-1 134,-0.8 138,-1.8 144,-3.5 147,-6 150,-10.5 146,-8 143,-9 141,-9 138,-8 138,-6 135,-4 133,-4 132,-2.5`,
+`114,-22 114,-26 115,-34 118,-35 124,-33.5 131,-31.5 135,-34.5 138,-35 140,-38 144,-38.5 147,-39 150,-37 153,-31 153,-25 146,-19 145,-15 142,-10.7 141.5,-17 137,-15.5 136,-12 132,-11.5 129,-15 126,-14 122,-17.5`,
+`172.7,-34.5 175,-37 178,-37.7 176,-41.5 174.5,-41 174.8,-39`,`172.8,-40.5 174,-41.8 171,-44.5 169,-46.6 166.5,-46 168,-44 171,-42`,
+`-156,18.9 -154.8,19.5 -155.5,20.2 -156,19.7`,`-158.3,21.3 -157.7,21.25 -157.7,21.7 -158.2,21.6`,`79.9,9.5 81.3,8.5 81.8,7.2 81,6.2 80,6 79.8,7.8`,`120.1,23 121,25.2 122,25 121.5,23 120.8,21.9`,`108.7,19.2 110.5,20.1 111,19.5 109.5,18.2`,`142,46 143.5,49.5 143.2,53 142,54 142,50`,`144.7,-40.7 148,-40.9 148.2,-42.2 146.5,-43.6 145.2,-42.4`,`11,78.5 17,80 25,80 20,77 14,77`,`52,71 57,74 62,76.5 68,77 62,74 56,71`,`-74.4,18.4 -72.5,19.9 -70,19.8 -68.4,18.6 -70,18.2 -72,18`,`-78.3,18.4 -76.3,18.2 -77,17.8`,`-67.2,18.3 -65.6,18.4 -66,17.9`,`-59.4,47.6 -56,51.6 -53,49.5 -52.7,47.5 -55,46.9`,`-128.3,50.7 -125,50.5 -123.4,48.4 -124.9,48.5`,`32.3,35.1 34.6,35.7 33.8,34.6`,`12.4,38.1 15.6,38.3 15.1,36.7 12.7,37.6`,`8.2,41 9.7,41 9.5,39.1 8.4,39`,`8.6,42.9 9.5,43 9.4,41.4 8.7,41.6`,`23.5,35.5 26.3,35.2 24,35`,`177.3,-17.4 178.6,-17.7 178.2,-18.3 177.4,-18.1`,`164,-20.3 166.8,-22 166,-22.4 163.8,-21`,`148.3,-5.5 152,-4.2 152.3,-5.8 150,-6.1`,`159.6,-9.1 160.8,-9.4 160.4,-9.9 159.8,-9.6`,`-117.1,32.5 -116.4,30.8 -115,28.7 -113.2,26.8 -112,24.8 -110.3,23.1 -109.5,23.3 -111.3,26.2 -113.1,29.3 -114.7,31.6`,`122,7.5 124,8.8 126.3,8.5 126.5,6.5 125.4,5.6 123.5,7`,`115.5,-8.4 119,-8.5 123,-8.5 123,-9 119,-9 115.5,-8.8`,`124,-9.5 127,-8.4 127,-8.8 124.5,-10.3`,`49.5,-12 50.5,-15.5 47,-25 44,-24.5 43.5,-21 44.5,-16 47,-14.5`,`-85,22 -80,23 -74,20 -77,19.8 -82,22.3`,
+`-180,-78 -160,-78 -150,-75 -125,-73.5 -100,-73.5 -75,-72 -62,-65 -57,-63.5 -65,-68 -62,-72 -60,-75 -45,-78 -30,-72 -15,-70 10,-70 30,-69 50,-67 70,-68 90,-66 110,-66 135,-66 150,-69 165,-72 170,-77 180,-78 180,-90 -180,-90`];
+const SEAS=[`28,41.5 28.5,44 30,46 33,46 33.5,44.5 36.5,45.3 38,47 39,46 37.5,44.5 41,42.5 41.5,41.5 36,41.3 31,41`,
+`47,45 50,46.5 53,46.5 53,44 51,43 51.5,41 53,40 54,37 50,37 49,38.5 49.5,40.3 47.5,43`,
+`10.5,57.8 12.5,56 12.7,55.4 14,54.2 19.5,54.6 21,56.5 21.2,57.5 23.5,57.5 24.3,59.3 30.5,59.8 28,60.3 22,60 21.5,63.5 25,65.3 21,65 19,63 17.5,61 17,58.5 16.5,56.5 14.5,56 13,55.5`,`-92,46.8 -90,48 -88,48.7 -85,47.8 -84.6,46.6 -87,46.5 -90.5,46.6`,`-87.8,42 -87,45.7 -85.5,45.5 -86.4,43.5 -86.8,41.8`,`-84.7,45.9 -82,45.4 -80.2,44.8 -81.7,43.3 -83.7,44`,`-83.4,41.7 -80,42.6 -79,42.9 -81.5,41.4`,`-79.8,43.3 -76.2,43.5 -76.5,44.2 -78.5,43.8`,`31.7,-0.1 34,0.5 34.2,-1.3 32.7,-2.4 31.8,-1.4`,`103.7,51.5 105,52 108,54 110.5,55.7 109.8,53.5 106,51.7`,`29.2,-3.4 30,-4.7 30.8,-8.5 29.5,-6.5`];
+// Regional fault traces are curated approximations, not a complete plate-interface database. The Tohoku trace is guided by USGS finite-fault bounds and GSI fault geometry.
+const fru0=new Float32Array(N);
+const FS=`Cascadia|s|-125,49 -125.5,44 -124.5,40.5
+San Andreas|t|-124,40.3 -122.5,37.5 -120,35.3 -117,34.2 -115.5,32.5
+Aleutian Trench|s|-155,56.5 -165,54 -172,52 -180,51 -187,51.5 -195,53 -200,53
+Kuril-Kamchatka Megathrust|s|160.5,54.5 158.5,52.5 156.5,50.5 154.5,48.5 152.5,46.5 150.5,44.5 148.5,42.8 147,41.5
+Japan Trench Megathrust|s|147,41.5 145.8,40.5 144.8,39.5 144.2,38.5 143.8,37.5 143.2,36.5 142.5,35.5 141.8,34.5
+Tohoku 2011 Interface Trace|s|143.15,41.0 142.95,40.4 142.7,39.7 142.48,39.0 142.3,38.3 142.08,37.6 141.85,36.8 141.55,36.0 141.25,35.3
+Nankai-Ryukyu Megathrust|s|138.7,34.5 136.5,33.8 134.2,32.8 132.1,31.5 130.2,29.8 128.4,28.0 126.3,26.1 124.1,24.8 122,24
+Izu-Bonin-Mariana Trench|s|141.8,33.2 142.5,30.5 143.2,27.5 144,24.5 144.8,21.5 145.3,18.5 145.2,15.5 144.5,13
+Philippine Trench|s|127.8,10.5 127.2,8.5 126.8,6.5 126.5,4.5
+Manila Trench|s|120.8,20.5 120.1,18.5 119.7,16.5 119.8,14.5 120.4,12.5
+Sunda Megathrust|s|93.5,13.0 93.2,11.0 92.9,9.0 93.1,7.0 94.0,5.0 95.2,3.0 96.7,1.0 98.4,-1.0 100.2,-3.0 102.2,-4.8 104.3,-6.5 106.5,-8.0 109.0,-9.2 112.0,-10.0 115.0,-10.5 118.0,-10.8 121.0,-10.8 124.0,-10.5 127.0,-10.0
+Sumatran Fault|t|97.5,5.5 99,2 101,-1 103,-4 105,-5.7
+Himalayan Front|c|73,35 78,32 83,28.5 88,27.5 93,27.5 96,28.5
+Zagros|c|44,37 47,34 50,31 55,27.5
+Makran|s|57,25.5 61,25 66,24.5
+North Anatolian|t|27,40.7 31,40.7 35,41 39,40 41,39.5
+East Anatolian|t|36,36.5 39,38 41,39.5
+Hellenic Arc|s|20,38 21,36.5 24,34.7 28,35.5 30,36
+Alps|c|6,45 9,46.5 13,46.5
+Apennines|c|9,44 12,43 14,41.5 16,39.5
+Tian Shan|c|72,41.5 80,42 88,43.5
+Altyn Tagh|t|80,37 90,39 98,39.5
+Longmenshan|c|102,31 104,31.5 105.5,33
+Baikal Rift|r|104,52 109,54 113,55.5
+Dead Sea Transform|t|35,29.5 35.5,32.5 36.2,34.5
+East African Rift|r|44,12 40,9 36,2 34,-3 33,-8 34,-11 35,-16
+Red Sea Rift|r|33,28 36,22 40,15 43,12.5
+Mid-Atlantic Ridge|r|-24,63.5 -29,59 -33,52 -29,38 -35,30 -45,26 -45,12 -33,0 -14,-8 -14,-20 -14,-30 -12,-40 0,-50 4,-55
+SW Indian Ridge|r|4,-55 20,-50 40,-45 58,-38
+Central Indian Ridge|r|58,-38 68,-26 66,-12 62,-5 60,5 52,13
+East Pacific Rise|r|-109,25 -106,13 -105,0 -112,-15 -113,-30 -118,-40 -140,-55 -150,-56
+Pacific-Antarctic Ridge|r|-150,-56 -170,-61 -180,-63 -190,-62
+Peru-Chile Trench|s|-79.5,2 -80.5,-3 -81,-7 -77,-12 -72,-17 -71.5,-23 -72,-30 -73,-37 -75,-43 -75.5,-47
+Middle America Trench|s|-106,19 -102,17.5 -96,15.5 -92.5,14 -88,12 -85,10 -83,8
+Lesser Antilles|s|-68,19.8 -64,19.5 -61.5,16.5 -61,13 -60,11
+Caribbean Transform|t|-85,18 -80,19.5 -75,19.7 -70,19.7
+Queen Charlotte Fault|t|-131.5,51.5 -133,53 -135,56.5 -138,59
+Denali Fault|t|-153,61.5 -148,63.2 -142,63.5
+Tonga-Kermadec|s|-174.5,-15 -175.5,-21 -176,-25 -178,-30 -181,-33 -182,-36.5 -183,-39
+Alpine Fault NZ|t|168,-44.5 171,-42.5
+Solomon-Vanuatu|s|148,-6.5 152,-5.7 156,-7 160,-9.5 165,-11.5 168,-15.5
+San Jacinto|t|-117.3,34.1 -116.5,33.3 -115.8,32.9|m
+Hayward-Calaveras|t|-122.3,38 -122.1,37.6 -121.7,37 -121.3,36.6|m
+Garlock|t|-118.8,34.9 -117.5,35.2 -116,35.6|m
+Elsinore|t|-117.5,33.8 -116.8,33.2 -116.2,32.7|m
+Wasatch|c|-111.9,41.8 -111.9,40.5 -112.1,39.2|m
+New Madrid|t|-90.3,37.2 -89.5,36.4 -89.1,35.7|m
+Walker Lane|t|-118,38.5 -117.5,37.2 -117,36|m
+Mexican Volcanic Belt|c|-105,19.5 -101,19.6 -97.5,19.2|m
+Polochic-Motagua|t|-91.5,15.6 -89.5,15.4 -88,15.2|m
+Oca-Ancon|t|-72.5,11.5 -71,11 -69.5,10.8|m
+Bocono|t|-72.2,7.8 -70.8,8.6 -69.2,9.6|m
+Romeral|t|-76.2,3.2 -75.5,5.5 -75.2,7.5|m
+Liquine-Ofqui|t|-72.5,-39 -72.8,-42 -73.5,-46|m
+Atacama Fault|t|-70.5,-20 -70.7,-24 -70.9,-28|m
+Magallanes-Fagnano|t|-70,-53.8 -68,-54.3 -66,-54.6|m
+Hope Fault|t|171.7,-42.4 173,-42.5 173.5,-42.7|m
+Wairarapa|t|175.2,-41.4 175.9,-40.8 176.4,-40|m
+Taupo Rift|r|175.8,-39 176.2,-38.3 176.8,-37.8|m
+Puysegur Trench|s|165,-47 166,-45.8 167,-45.5|m
+Philippine Fault|t|121.5,17.5 122.2,15 124,11 125.5,8.5|m
+Palu-Koro|t|119.8,-0.5 119.9,-1.5 120.5,-3|m
+Flores Thrust|c|116,-8.2 120,-8.2 123.5,-8.2|m
+Banda Arc|s|123,-8.5 126,-6.5 129,-5.5 131,-5|m
+Sagaing Fault|t|96,26 96.3,22 96.7,19 97,17|m
+Red River Fault|t|100,26 102.5,24 104.5,22.5 106.5,21|m
+Xianshuihe|t|100.5,31.8 101.8,30.5 102.5,29.5|m
+Kunlun Fault|t|91,35.5 95,35.8 99,35.4 103,34.2|m
+Haiyuan|t|103,36.7 105.5,36.8 107,36|m
+Tan-Lu|t|117.5,34 118,37 123,42|m
+Median Tectonic Line|t|130.5,33 132.5,33.8 135,34.2 137.5,35.5|m
+Itoigawa-Shizuoka|c|137.8,36.8 138.1,36 138.4,35.2|m
+Japan Sea Margin|c|137.5,38 139.4,40 140,42|m
+Corinth Rift|r|21.8,38.3 22.6,38.2 23,38|m
+Calabrian Arc|c|15,37.2 16.5,38 16.5,39.5|m
+Gloria-Azores|t|-28,38.5 -22,37.6 -15,36.5 -10,36|m
+Rhine Graben|r|7.5,47.5 8,49 8.4,50.3|m
+Main Recent Fault|t|46.5,36.5 48,34.5 49.5,33 51.5,31.5|m
+Chaman Fault|t|66.5,31.6 67.5,30 68.2,28.5|m
+Main Boundary Thrust|c|77,30.5 81,29.2 85,27.5 89,27|m
+Karakoram Fault|t|78.5,34.5 80.5,33 82.3,31.3|m
+Gulf of Suez|r|32.5,29.8 33.3,28.8 34,27.8|m
+Albertine Rift|r|29.5,2.5 30.3,0.5 29.5,-2|m
+Kenya Rift|r|36.2,3 36,0.3 36.6,-2|m
+Atlas Fault|c|-6,32 -3,33.5 1,35|m
+Hispaniola Fault|t|-71.8,18.5 -70,19.3 -68.9,19.5|m
+South Sandwich|s|-27,-56 -26,-58 -27.5,-60.5|m
+Scotia Transform|t|-60,-55 -45,-55.5 -35,-55|m
+Cayman Trough|r|-83,18.2 -80,19 -77,19.2|m`;
+const RID=[[85,32,13,4,4300],[-68,-20,2.5,5,3800],[-71,-33,1.8,6,3000],[-76,-6,2.2,5,3000],[-74,5,2,4,2200],[-73,-45,2,5,1500],[-110,45,4,8,2300],[-107,35,3,4,2000],[-121,40,2,6,1800],[10,46.5,5,1.5,2600],[45,40,6,2,2300],[55,34,5,3,1600],[82,44,8,3,2600],[39,9,4,4,2200],[35,-3,3,5,1200],[28,-25,6,5,1100],[-80,38,3,6,700],[10,62,3,4,1000],[137.6,36.2,.8,1.5,1500],[-3,32,6,1.5,1800],[140,-5,6,1.5,2600],[148,-30,1.5,10,700],[0,-88,120,10,2800],[-40,73,10,8,2500],[100,46,12,4,1300],[77,18,5,5,450],[-48,-15,6,6,600],[45,24,6,5,600],[34,39,5,2,900],[0,42.7,2.5,.5,1600],[24.5,47,3,1.5,900],[18,43.5,2.5,1.5,1100],[13.5,42,1,2.5,1000],[71,37,3,2,3500],[76,36,2.5,1.2,3500],[90,36,8,1.2,2500],[108,34,4,1,1300],[-150,62,4,1.2,2200],[-152,68,6,1,900],[-106,26,2,4,1800],[-100,24,1.5,3,1500],[-119,37.5,1,2.2,2400],[-121.8,45,1,3,1500],[29,-29,2,2.5,1500],[50,32,2.5,3.5,1500],[52,36.4,3,.7,2000],[160,55,2,4,1300],[100,-1,1,5,1400],[110,-7.5,3,.5,1200],[121,23.7,.5,1.2,1800],[170.5,-43.8,1.5,1.2,1800],[-45,-22,3,2,1000],[-62,5,3,2,1000],[17,21,2,1.5,1500],[6,23,2,1.5,1200],[-4.5,57,1.2,1,600],[74,15,.7,5,900],[94,21,.8,4,1200]];
+const CITY=`Tokyo,139.7,35.7,1;Washington,-77,38.9,1;Ottawa,-75.7,45.4,1;Mexico City,-99.1,19.4,1;Havana,-82.4,23.1,1;Guatemala City,-90.5,14.6,1;Panama City,-79.5,9,1;Bogota,-74.1,4.7,1;Quito,-78.5,-.2,1;Lima,-77,-12,1;La Paz,-68.1,-16.5,1;Santiago,-70.7,-33.4,1;Buenos Aires,-58.4,-34.6,1;Montevideo,-56.2,-34.9,1;Brasilia,-47.9,-15.8,1;Caracas,-66.9,10.5,1;Reykjavik,-21.9,64.1,1;London,-.1,51.5,1;Paris,2.35,48.9,1;Madrid,-3.7,40.4,1;Lisbon,-9.1,38.7,1;Rome,12.5,41.9,1;Athens,23.7,38,1;Ankara,32.9,39.9,1;Moscow,37.6,55.8,1;Cairo,31.2,30,1;Rabat,-6.8,34,1;Algiers,3.1,36.8,1;Accra,-.2,5.6,1;Abuja,7.5,9.1,1;Addis Ababa,38.7,9,1;Nairobi,36.8,-1.3,1;Pretoria,28.2,-25.7,1;Luanda,13.2,-8.8,1;Antananarivo,47.5,-18.9,1;Riyadh,46.7,24.7,1;Tehran,51.4,35.7,1;Islamabad,73,33.7,1;New Delhi,77.2,28.6,1;Dhaka,90.4,23.8,1;Colombo,79.9,6.9,1;Kathmandu,85.3,27.7,1;Bangkok,100.5,13.8,1;Hanoi,105.8,21,1;Kuala Lumpur,101.7,3.1,1;Jakarta,106.8,-6.2,1;Manila,121,14.6,1;Beijing,116.4,39.9,1;Seoul,127,37.6,1;Taipei,121.5,25,1;Canberra,149.1,-35.3,1;Wellington,174.8,-41.3,1;Port Moresby,147.2,-9.4,1;Suva,178.4,-18.1,1;Los Angeles,-118.2,34,0;San Francisco,-122.4,37.8,0;Seattle,-122.3,47.6,0;Honolulu,-157.8,21.3,0;Hilo,-155.1,19.7,0;Anchorage,-150,61.2,0;Miami,-80.2,25.8,0;New York,-74,40.7,0;Sydney,151.2,-33.9,0;Osaka,135.5,34.7,0;Shanghai,121.5,31.2,0;Mumbai,72.9,19,0;Istanbul,29,41,0;Lagos,3.4,6.5,0;Chennai,80.3,13.1,0;Kolkata,88.4,22.6,0;Karachi,67,24.9,0;Guangzhou,113.3,23.1,0;Hong Kong,114.2,22.3,0;Ho Chi Minh City,106.7,10.8,0;Busan,129,35.1,0;Vladivostok,131.9,43.1,0;Petropavlovsk,158.6,53,0;Cape Town,18.4,-33.9,0;Durban,31,-29.9,0;Dar es Salaam,39.3,-6.8,0;Mombasa,39.7,-4,0;Casablanca,-7.6,33.6,0;Dakar,-17.4,14.7,0;Valparaiso,-71.6,-33,0;Guayaquil,-79.9,-2.2,0;Cartagena,-75.5,10.4,0;Houston,-95.4,29.8,0;New Orleans,-90.1,30,0;Vancouver,-123.1,49.3,0;San Diego,-117.2,32.7,0;Acapulco,-99.9,16.9,0;Auckland,174.8,-36.9,0;Perth,115.9,-32,0;Brisbane,153,-27.5,0;Noumea,166.5,-22.3,0;Papeete,-149.6,-17.5,0;Banda Aceh,95.3,5.6,0;Padang,100.4,-1,0;Surabaya,112.7,-7.3,0;Sendai,140.9,38.3,0;Sapporo,141.4,43.1,0;Hiroshima,132.5,34.4,0;Nagoya,136.9,35.2,0;Phuket,98.4,7.9,0;Chittagong,91.8,22.3,0;Valdivia,-73.2,-39.8,0`.split(";").map(t=>{const a=t.split(",");return[a[0],+a[1],+a[2],+a[3]]});
+const RV=`Nile|32,-2 32.5,3 31.6,9.5 32.5,15.6 33,19 31.5,22.5 32.5,25.7 31.2,30 31,31.5
+Amazon|-77,-5 -73.5,-4 -70,-3.5 -63,-3.4 -58,-2.5 -52,-1.5 -50,-0.5
+Mississippi|-95.2,47.2 -93.3,44.9 -91.2,41 -90.2,38.6 -89.5,36 -91.2,32 -91.4,30 -89.2,29.1
+Yangtze|91,33.5 97,32 100,28 104.5,28.8 108,30.8 112,30.4 115,30 117,31 121.5,31.5
+Yellow River|96,35 101,34 103,36 107,39.5 111,39 110.5,35 114,34.8 118,37.5
+Ganges|79,30.9 80,27 83,25.5 87,25 88.5,24.5 90.2,23.2
+Brahmaputra|85,29.3 91,29.4 95,29.5 94.5,27 91,26.2 89.7,25.5 90.2,23.2
+Indus|81,31 78,34 74.5,35.5 72,34 70.5,28 68,26 67.5,24
+Mekong|98,32 99,28 100.4,21.5 102,18 105,15 106,11.5 106.7,10
+Congo|27,-11 26,-5 25,0.5 21,1 17,-2 15.3,-4.3 12.5,-6
+Niger|-10.5,10.5 -6,13.5 -3.5,16 0,15.5 2.5,12 5,10 6,6 6,4.3
+Zambezi|24,-12 23,-17 26,-17.9 30,-15.7 34,-16.2 36.5,-18.5
+Danube|8.2,48 13,48.5 17,48.1 19,47.5 21,45 25,43.7 28,44.5 29.7,45.2
+Rhine|8.5,46.5 7.6,47.6 8.3,49.5 6.9,51.2 6,51.9 4.2,52
+Volga|33,57 40,57 44,56.3 46,53 47,48.7 48,46
+Murray|148,-36.5 144,-35.8 140.5,-34.2 139.3,-35.5
+Euphrates|38,38.5 40.5,36.5 44,33.3 47.5,31 48.5,30
+Columbia|-118,52 -117.5,48.5 -119.5,46.5 -122,45.7 -123.9,46.2
+Rio Grande|-106.5,37.5 -106,33 -106.5,31.8 -101.5,29.5 -99.5,27 -97.2,25.9
+Orinoco|-67.5,2.5 -67,6.5 -66,8 -63.5,8.5 -61.5,8.8
+Parana|-50,-20 -53,-24 -55.5,-27.5 -58.5,-34 -57.5,-35
+Mackenzie|-117,61 -124,66 -134,68.7
+Lena|108,53.5 118,60 127,64.5 126.7,71
+Ob|85,52 77,57 69,62 68,66.5 73,69
+Yenisei|92,51 92,56 87.5,62.5 86.5,67 82.5,72
+Amur|119,52.5 127,50 134,48.5 140.5,53
+Irrawaddy|97.5,26 96,21 95.2,18 95,16
+St Lawrence|-80,43 -76,44.2 -73.5,45.5 -70,47.5 -66,49.5
+Yukon|-134,60 -139,63 -150,65 -161,62.5`.split("\n").map(l=>{const[n,c]=l.split("|");return{n,p:c.split(" ").map(t=>t.split(",").map(Number))}}),VOL=[["Fuji",138.73,35.36,3776],["Sakurajima",130.66,31.58,1117],["Aso",131.1,32.88,1592],["Pinatubo",120.35,15.13,1486],["Taal",120.99,14.0,311],["Mayon",123.69,13.26,2463],["Krakatau",105.42,-6.1,813],["Merapi",110.44,-7.54,2910],["Tambora",117.99,-8.25,2850],["Agung",115.51,-8.34,3031],["Mauna Loa",-155.6,19.48,4169],["Kilauea",-155.28,19.41,1247],["St Helens",-122.18,46.2,2549],["Rainier",-121.76,46.85,4392],["Yellowstone",-110.6,44.4,2805],["Popocatepetl",-98.62,19.02,5426],["Cotopaxi",-78.44,-0.68,5897],["Ojos del Salado",-68.54,-27.11,6893],["Etna",14.99,37.75,3357],["Vesuvius",14.43,40.82,1281],["Santorini",25.4,36.4,367],["Hekla",-19.7,63.98,1491],["Eyjafjallajokull",-19.62,63.63,1651],["Kilimanjaro",37.35,-3.07,5895],["Nyiragongo",29.25,-1.52,3470],["Erebus",167.17,-77.53,3794],["Ruapehu",175.56,-39.28,2797],["Katmai",-154.95,58.28,2047],["Pelee",-61.17,14.81,1397],["Ararat",44.3,39.7,5137],["Damavand",52.11,35.95,5610],["Klyuchevskoy",160.64,56.06,4750],["Rabaul",152.2,-4.27,688]],SEAL=[["Pacific Ocean",-150,5],["Atlantic Ocean",-35,25],["Indian Ocean",80,-20],["Southern Ocean",20,-62],["Arctic Ocean",0,82],["Mediterranean",12,34.5],["Sea of Japan",132,40],["Bering Sea",-175,58],["Gulf of Mexico",-92,25],["Caribbean Sea",-74,15],["Arabian Sea",62,14],["Tasman Sea",160,-38]];
+const CN=["Ocean","Ice cap","Tundra","Boreal forest","Temperate","Semi-arid","Desert","Savanna","Rainforest"];
+const CC=[[0,0,0],[232,241,245],[157,179,163],[63,107,78],[111,170,85],[201,184,101],[226,196,138],[169,184,68],[31,122,61]],CAP=[0,0,25,90,130,70,40,100,180];
+const LR=[[0,86,140,72],[300,140,172,92],[900,194,186,112],[1800,164,132,98],[3000,132,112,104],[4500,214,208,208],[6500,255,255,255]],OR=[[0,120,192,224],[200,88,162,208],[1500,40,98,166],[4500,10,38,84]];
+const MR=[[3.5,190,230,255],[5,255,240,120],[6,255,190,60],[7,250,130,40],[8,230,60,40],[9,170,20,60],[11,90,0,70]];
+function ramp(R,v){const n=R.length-1;if(v<=R[0][0])return[R[0][1],R[0][2],R[0][3]];for(let i=1;i<=n;i++)if(v<=R[i][0]){const a=R[i-1],b=R[i],t=(v-a[0])/(b[0]-a[0]);return[a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t,a[3]+(b[3]-a[3])*t]}return[R[n][1],R[n][2],R[n][3]]}
+const LUL=[],LUO=[];for(let i=0;i<410;i++)LUL.push(ramp(LR,i*16));for(let i=0;i<150;i++)LUO.push(ramp(OR,i*32));
+const land=new Uint8Array(N),elev=new Float32Array(N),T=new Float32Array(N),P=new Float32Array(N),cls=new Uint8Array(N),dep=new Float32Array(N),fcell=new Uint8Array(N),fid=new Int32Array(N).fill(-1);
+const eta=new Float32Array(N),uu=new Float32Array(N),vv=new Float32Array(N),maxE=new Float32Array(N),inund=new Float32Array(N),ru=new Float32Array(N),wd=new Float32Array(N),soil=new Float32Array(N),dw=new Float32Array(N),dist=new Float32Array(N),mmi=new Float32Array(N),tsuSrc=new Float32Array(N),tsuAmp=new Float32Array(N);
+const bt=new Uint8ClampedArray(N*4),bc=new Uint8ClampedArray(N*4);const riv=new Uint8Array(N),amp=new Float32Array(N),arrT=new Float32Array(N).fill(-1),pkT=new Float32Array(N),hu=new Float32Array(N),hv=new Float32Array(N),mk=new Uint32Array(N),tm=new Uint8Array(N),CW=W>>2,CH=H>>2,cdep=new Float32Array(CW*CH),et=new Float64Array(CW*CH);let CO=[],mkL,ha,nl,no,hiT,hiC,A=[],st=1,dL,dO,isl,fdist,L1=[],L2=[];
+const FL=FS.split("\n").map(l=>{const[n,t,c,m]=l.split("|");return{n,t,m:!!m,p:c.split(" ").map(s=>s.split(",").map(Number))}});
+const cosR=new Float32Array(H),dxr=new Float32Array(H);for(let j=0;j<H;j++){cosR[j]=Math.cos((90-(j+.5)/RZ)*Math.PI/180);dxr[j]=Math.max(CS*1000*cosR[j],22000)}
+const idx=(lo,la)=>{lo=((lo+540)%360)-180;return Math.min(H-1,Math.max(0,Math.floor((90-la)*RZ)))*W+Math.min(W-1,Math.floor((lo+180)*RZ))};
+function hav(a1,o1,a2,o2){const r=Math.PI/180,A=(a2-a1)*r,O=(o2-o1)*r,h=Math.sin(A/2)**2+Math.cos(a1*r)*Math.cos(a2*r)*Math.sin(O/2)**2;return 12742*Math.asin(Math.sqrt(h))}
+function bfs(src,ids){const d=new Uint16Array(N).fill(65535),q=new Int32Array(N);let h=0,t=0;
+for(let i=0;i<N;i++)if(src[i]){d[i]=0;q[t++]=i;if(ids)ids[i]=i}
+const go=(n,i,nd)=>{if(d[n]>nd){d[n]=nd;if(ids)ids[n]=ids[i];q[t++]=n}};
+while(h<t){const i=q[h++],x=i%W,nd=d[i]+1;go(i-x+(x+1)%W,i,nd);go(i-x+(x+W-1)%W,i,nd);if(i>=W)go(i-W,i,nd);if(i<N-W)go(i+W,i,nd)}return d}
+function hash(x,y){let h=(x*374761393+y*668265263)|0;h=(h^(h>>>13))*1274126177|0;return((h^(h>>>16))>>>0)/4294967296}
+function vn(x,y){const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf),a=hash(xi,yi),b=hash(xi+1,yi),c=hash(xi,yi+1),d=hash(xi+1,yi+1);return a+(b-a)*u+(c-a)*v+(a-b-c+d)*u*v}
+function sub(a,b,o,d){const dx=b[0]-a[0],dy=b[1]-a[1],l=Math.hypot(dx,dy);if(l<.06||d>10||(Math.abs(a[0])===180&&Math.abs(b[0])===180)||(a[1]===-90&&b[1]===-90))return;
+const h=hash(Math.round(a[0]*37+b[0]*91),Math.round(a[1]*53+b[1]*17))-.5,A=Math.min(l*.42,1.1)*h,m=[(a[0]+b[0])/2-dy/l*A,(a[1]+b[1])/2+dx/l*A];sub(a,m,o,d+1);o.push(m);sub(m,b,o,d+1)}
+function rough(P){const o=[];for(let i=0;i<P.length;i++){o.push(P[i]);sub(P[i],P[(i+1)%P.length],o,0)}return o}
+const mmss=t=>{t=Math.round(t);return Math.floor(t/60)+":"+String(t%60).padStart(2,"0")};
+function hiBase(arr){const c=document.createElement("canvas");c.width=W*HF;c.height=H*HF;const x=c.getContext("2d"),im=x.createImageData(W*HF,H*HF),d=im.data,HW=W*HF;
+for(let hy=0;hy<H*HF;hy++){const cy=(hy/HF)|0;for(let hx=0;hx<HW;hx++){const k=cy*W+((hx/HF)|0),isL=ha[hy*HW+hx]>127;let q=k;if(isL){if(!land[k])q=nl[k]}else if(land[k])q=no[k];const p=(hy*HW+hx)*4;q*=4;d[p]=arr[q];d[p+1]=arr[q+1];d[p+2]=arr[q+2];d[p+3]=255}}x.putImageData(im,0,0);return c}
+function recomp(){const a=[X(-180),Y(90),360*sc,180*sc];tx.globalCompositeOperation="source-over";tx.clearRect(0,0,cw,ch);tx.imageSmoothingQuality="high";tx.drawImage(fcO,...a);tx.globalCompositeOperation="destination-out";tx.drawImage(mkL,...a);cx2.clearRect(0,0,cw,ch);cx2.drawImage(tmp,0,0,cw,ch);
+tx.globalCompositeOperation="source-over";tx.clearRect(0,0,cw,ch);tx.drawImage(fcL,...a);tx.globalCompositeOperation="destination-in";tx.drawImage(mkL,...a);cx2.drawImage(tmp,0,0,cw,ch);
+for(const w of WL){tx.globalCompositeOperation="source-over";tx.clearRect(0,0,cw,ch);tx.drawImage(w.c,...a);tx.globalCompositeOperation="destination-in";tx.drawImage(mkL,...a);const cc=w.comp.getContext("2d");cc.clearRect(0,0,cw,ch);cc.drawImage(tmp,0,0,cw,ch)}tx.globalCompositeOperation="source-over"}
+function ring(la0,lo0,R){const d=R/6371,a=la0*Math.PI/180,pts=[];let prev=lo0;for(let i=0;i<=120;i++){const th=i/120*2*Math.PI,la=Math.asin(Math.sin(a)*Math.cos(d)+Math.cos(a)*Math.sin(d)*Math.cos(th));let l=lo0+Math.atan2(Math.sin(th)*Math.sin(d)*Math.cos(a),Math.cos(d)-Math.sin(a)*Math.sin(la))*180/Math.PI;while(l-prev>180)l-=360;while(l-prev<-180)l+=360;prev=l;pts.push([l,la*180/Math.PI])}
+for(const o of[-360,0,360]){ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(X(p[0]+o),Y(p[1])):ctx.moveTo(X(p[0]+o),Y(p[1])));ctx.stroke()}}
+// Islands, approximated as rotated ellipses: name|lon,lat,semi-major km,semi-minor km,major-axis bearing (deg clockwise from north). Drawn at true size on the map; the 28 km simulation grid gets at least one land cell for each.
+const ISL=`Hawaii|-155.5,19.6,52,48,0
+Maui|-156.3,20.8,30,18,40
+Molokai|-157,21.15,26,7,95
+Oahu|-158,21.47,24,16,130
+Kauai|-159.5,22.05,21,19,0
+Hispaniola|-71.4,18.9,325,105,100
+PuertoRico|-66.5,18.22,88,30,90
+Jamaica|-77.3,18.15,118,36,95
+Trinidad|-61.3,10.45,50,42,0
+Tobago|-60.65,11.25,20,7,40
+Guadeloupe|-61.55,16.2,32,26,0
+Martinique|-61,14.65,22,14,20
+Dominica|-61.35,15.45,25,9,10
+StLucia|-60.97,13.9,17,8,0
+Barbados|-59.55,13.18,12,10,0
+Antigua|-61.8,17.08,12,10,0
+Grenada|-61.68,12.12,12,8,0
+Andros|-78,24.4,95,28,350
+GrandBahama|-78.4,26.65,75,12,95
+NewProvidence|-77.4,25.05,15,8,90
+Eleuthera|-76.2,25.1,60,5,40
+LongIslandBahamas|-75.2,23.2,60,6,330
+GreatInagua|-73.3,21.05,30,20,0
+Cayman|-81.25,19.3,28,8,80
+Bermuda|-64.75,32.3,18,4,60
+IslaJuventud|-82.8,21.65,40,38,0
+Cozumel|-86.9,20.4,25,8,0
+Margarita|-64,11,45,16,90
+Curacao|-69,12.15,28,8,130
+Aruba|-70,12.5,18,6,130
+Roatan|-86.5,16.35,32,5,80
+SanAndres|-81.7,12.55,8,4,0
+Cedros|-115.2,28.2,28,10,310
+Tiburon|-112.4,29,35,20,0
+SaoMiguel|-25.5,37.78,35,10,100
+Terceira|-27.2,38.72,16,12,0
+PicoFaial|-28.3,38.5,45,10,110
+FloresCorvo|-31.2,39.45,14,7,0
+Madeira|-16.95,32.75,32,12,80
+PortoSanto|-16.35,33.07,8,5,0
+Tenerife|-16.6,28.3,32,22,40
+GranCanaria|-15.6,27.95,24,22,0
+Fuerteventura|-14,28.4,55,12,40
+Lanzarote|-13.6,29.03,32,12,40
+LaPalma|-17.85,28.7,24,12,0
+GomeraHierro|-17.2,28.1,16,10,0
+CVSantiago|-23.6,15.05,28,13,20
+CVSalBoaVista|-22.95,16.1,30,12,0
+CVSaoVicente|-25.1,16.9,35,15,60
+CVFogo|-24.4,14.95,12,12,0
+Faroe|-6.95,62.05,45,25,10
+Shetland|-1.3,60.4,40,10,10
+Orkney|-3.05,59,30,18,30
+Hebrides|-7.1,57.5,90,12,30
+Lewis|-6.7,58.2,40,20,40
+IsleOfMan|-4.5,54.2,20,8,20
+Anglesey|-4.35,53.28,22,14,0
+IsleOfWight|-1.3,50.67,20,12,90
+Iceland|-19,64.9,250,95,90
+JanMayen|-8.1,71,28,5,40
+Spitsbergen|16,78.4,230,100,20
+Nordaustlandet|22.2,79.8,100,65,0
+Edgeoya|22.5,77.6,55,40,0
+BearIsland|19,74.4,8,6,0
+Lofoten|14,68.2,100,22,40
+Vesteralen|15.2,69,50,15,40
+Gotland|18.5,57.5,80,25,20
+Oland|16.65,56.7,70,8,20
+Zealand|11.8,55.5,60,50,0
+Funen|10.35,55.3,45,30,90
+Bornholm|14.95,55.15,20,12,0
+Aland|20,60.2,40,30,0
+Saaremaa|22.6,58.4,50,35,0
+Hiiumaa|22.6,58.9,25,20,0
+Rugen|13.4,54.45,20,15,0
+FalklandEast|-58.7,-51.75,95,50,90
+FalklandWest|-60.2,-51.7,70,45,0
+SouthGeorgia|-36.5,-54.3,85,12,125
+Tristan|-12.3,-37.1,10,10,0
+StHelena|-5.7,-15.95,10,7,0
+Ascension|-14.35,-7.95,8,6,0
+Noronha|-32.4,-3.85,8,4,0
+Bioko|8.7,3.5,38,16,20
+SaoTome|6.6,0.25,26,12,10
+Principe|7.4,1.62,9,6,0
+Bijagos|-15.9,11.15,60,40,0
+Zanzibar|39.3,-6.1,48,13,0
+Pemba|39.75,-5.2,38,10,0
+Mafia|39.75,-7.9,25,8,0
+GrandeComore|43.35,-11.7,32,14,0
+Anjouan|44.45,-12.2,14,10,0
+Mayotte|45.15,-12.8,20,10,0
+NosyBe|48.3,-13.35,14,12,0
+SteMarie|49.9,-16.8,30,6,25
+Mauritius|57.55,-20.25,36,26,0
+Reunion|55.5,-21.12,32,26,0
+Rodrigues|63.4,-19.7,14,6,90
+Mahe|55.5,-4.65,16,7,30
+Socotra|53.9,12.5,70,22,80
+Masirah|58.8,20.4,45,8,30
+Bahrain|50.55,26.05,22,10,0
+Qeshm|55.8,26.8,60,10,70
+MaldivesN|73,5.5,15,8,0
+Male|73.5,4.2,18,8,0
+MaldivesMid|73.1,2.8,18,8,0
+MaldivesS|73,0.6,15,6,0
+Addu|73.15,-0.65,10,5,0
+Lakshadweep|72.7,10.6,15,6,0
+Andaman|92.9,12.1,175,20,5
+LittleAndaman|92.55,10.7,25,10,10
+CarNicobar|92.8,9.2,15,8,0
+CentralNicobar|93.5,8,40,12,350
+GreatNicobar|93.8,7,30,14,0
+Simeulue|96.1,2.6,60,13,135
+Nias|97.6,1.1,60,25,135
+Batu|98.4,-0.1,40,10,135
+Siberut|98.85,-1.35,50,22,140
+Sipora|99.7,-2.15,35,10,140
+NorthPagai|100.1,-2.7,40,12,140
+SouthPagai|100.4,-3,25,10,140
+Enggano|102.3,-5.4,20,9,130
+Bangka|106.1,-2.4,115,50,135
+Belitung|107.9,-2.85,45,38,0
+Bali|115.2,-8.35,50,30,70
+Lombok|116.45,-8.55,36,30,0
+Sumbawa|117.6,-8.65,105,30,80
+Flores|121.7,-8.6,190,28,85
+Sumba|119.95,-9.7,100,38,60
+Timor|125,-9,250,48,60
+Alor|124.3,-8.25,60,15,90
+Wetar|126.2,-7.7,60,15,90
+Tanimbar|131.5,-7.5,60,25,350
+Kai|132.75,-5.7,45,12,0
+Aru|134.4,-6.2,75,40,0
+Seram|129.5,-3.1,170,42,95
+Buru|126.65,-3.35,60,50,0
+Ambon|128.2,-3.65,20,10,60
+Halmahera|128,0.7,110,55,350
+Morotai|128.4,2.3,35,22,0
+Obi|127.7,-1.5,45,25,90
+Sula|125.9,-1.95,65,10,90
+Banggai|123.2,-1.5,55,25,70
+Sangihe|125.5,3.5,30,10,0
+Talaud|126.8,4,28,10,0
+Biak|136.1,-1,50,16,70
+Yapen|136.2,-1.75,50,10,110
+Waigeo|130.8,-0.2,40,25,0
+Misool|130,-1.95,35,12,0
+Salawati|130.9,-0.9,40,10,0
+Buton|122.85,-5.1,55,20,20
+Muna|122.6,-4.95,35,20,0
+SulawesiNorth|124.4,1,170,20,75
+SulawesiCentral|120.6,-1,170,45,10
+SulawesiSW|119.9,-4.1,150,40,0
+SulawesiSE|122.1,-4,150,28,40
+Natuna|108,3.9,50,30,0
+Anambas|106.2,3.1,35,15,0
+Batam|104,1.05,22,12,0
+Bintan|104.5,1.1,25,18,0
+Madura|113.4,-7.05,80,15,80
+Christmas|105.65,-10.5,12,8,0
+Cocos|96.85,-12.15,10,5,0
+Luzon|121,16,250,95,0
+Mindoro|121,12.9,65,45,0
+Palawan|118.8,9.5,230,24,35
+Panay|122.4,11.2,60,50,0
+Negros|123,10,110,40,40
+Cebu|123.85,10.3,100,12,25
+Bohol|124.2,9.85,32,30,0
+Leyte|124.9,10.9,70,35,0
+Samar|125.1,12,85,55,0
+Masbate|123.6,12.3,55,18,50
+Catanduanes|124.2,13.7,32,25,0
+Mindanao|125,7.9,215,165,0
+Jolo|121,6,35,10,60
+Basilan|122.05,6.5,30,25,0
+Tawitawi|120,5.1,35,12,40
+Taiwan|121,23.7,200,70,20
+Hainan|109.8,19.2,130,95,0
+Jeju|126.55,33.4,42,16,90
+Tsushima|129.3,34.4,38,8,20
+Sado|138.4,38,32,18,20
+Awaji|134.9,34.45,22,8,30
+Shikoku|133.5,33.75,95,40,80
+Kyushu|131,32.8,115,85,20
+Okinawa|127.9,26.5,65,9,40
+Amami|129.4,28.3,32,12,40
+Miyako|125.3,24.8,16,10,0
+Ishigaki|124.2,24.4,24,12,0
+Yonaguni|123,24.45,10,5,0
+Tanegashima|131,30.6,35,8,20
+Yakushima|130.5,30.35,15,13,0
+IzuOshima|139.4,34.75,10,8,0
+Hachijo|139.8,33.1,8,6,0
+Chichijima|142.2,27.1,10,5,0
+IwoJima|141.3,24.8,6,5,0
+Sakhalin|143.1,50.5,450,55,10
+Iturup|147.9,45,100,17,50
+Kunashir|146,44,58,10,45
+Urup|150.2,45.9,50,8,50
+Simushir|152.8,47.1,25,8,45
+Onekotan|154.5,49.4,20,10,40
+Paramushir|155.8,50.3,40,15,40
+Shumshu|156.3,50.75,10,6,0
+Commander|166.3,55,60,10,125
+Karaginsky|164,58.7,50,15,30
+Zhoushan|122.1,30,35,20,0
+Chongming|121.6,31.65,40,12,70
+Singapore|103.82,1.35,25,14,0
+Penang|100.25,5.4,12,8,0
+Langkawi|99.8,6.35,20,12,0
+Phuket|98.35,7.95,25,10,0
+KohSamui|100,9.5,18,12,0
+Kodiak|-153.5,57.5,85,42,40
+Unimak|-164.5,54.8,60,20,60
+Unalaska|-166.5,53.7,45,20,40
+Umnak|-168.3,53.4,40,12,45
+Atka|-174.2,52.2,45,10,45
+Adak|-176.6,51.8,40,12,45
+Amchitka|179.1,51.5,25,6,0
+Kiska|177.5,52,28,10,30
+Attu|173,52.9,40,15,20
+StLawrence|-170.3,63.4,85,20,90
+Nunivak|-166.5,60,45,28,0
+Pribilof|-170.3,57.15,10,7,0
+Wrangel|-179.5,71.2,75,35,90
+Ellesmere|-77,80,420,150,40
+Devon|-87,75.5,190,60,95
+Victoria|-107.5,70.7,250,170,30
+Banks|-123.5,73.2,200,100,30
+PrinceOfWales|-98,73.3,120,100,0
+Somerset|-93.5,73.2,100,50,100
+Melville|-110.5,75.5,200,70,100
+Bathurst|-100.5,76.5,60,40,0
+AxelHeiberg|-90,79.5,180,80,30
+Southampton|-85.5,64.5,110,85,0
+Newfoundland|-56,48.7,255,165,45
+PEI|-63.2,46.4,70,20,80
+CapeBreton|-60.9,46.1,62,42,20
+Anticosti|-63,49.5,100,25,80
+VancouverIs|-126,49.9,235,48,120
+HaidaGwaii|-132.1,53.3,115,35,160
+Baranof|-135.2,57,100,40,150
+Chichagof|-135.8,57.9,80,30,140
+LongIslandNY|-72.9,40.85,95,12,70
+NovayaZemlyaS|55,71.5,200,40,25
+NovayaZemlyaN|65,75.5,330,60,35
+FranzJosef|55,81,150,60,0
+SevernayaZemlya|98,79.5,190,100,0
+NewSiberian|142,75,180,60,0
+Guam|144.78,13.45,22,9,20
+Saipan|145.72,15.15,14,6,20
+Palau|134.5,7.5,18,6,0
+Yap|138.1,9.5,12,5,0
+Chuuk|151.8,7.4,18,12,0
+Pohnpei|158.25,6.9,14,12,0
+Kosrae|163,5.3,8,6,0
+Majuro|171.15,7.1,18,5,0
+Kwajalein|167.4,9.1,22,6,0
+Wake|166.62,19.3,8,3,0
+Midway|-177.38,28.2,6,4,0
+Tarawa|173,1.4,22,5,0
+Kiritimati|-157.4,1.9,45,25,0
+Nauru|166.93,-0.52,8,6,0
+Funafuti|179.2,-8.52,10,4,0
+Wallis|-176.2,-13.3,10,8,0
+VitiLevu|177.9,-17.8,62,45,0
+VanuaLevu|179.2,-16.5,85,24,60
+Taveuni|-179.95,-16.85,22,8,40
+Kadavu|178.2,-19.05,32,9,70
+Savaii|-172.45,-13.6,42,28,0
+Upolu|-171.75,-13.9,42,13,80
+Tutuila|-170.7,-14.3,18,6,70
+Tongatapu|-175.2,-21.15,28,12,70
+Vavau|-173.95,-18.65,22,10,0
+Haapai|-174.75,-19.8,28,6,0
+Niue|-169.85,-19.05,14,10,0
+Rarotonga|-159.8,-21.23,10,8,0
+Tahiti|-149.45,-17.65,28,24,0
+Moorea|-149.85,-17.53,12,10,0
+BoraBora|-151.75,-16.5,9,8,0
+Raiatea|-151.45,-16.8,16,12,0
+NukuHiva|-140.1,-8.85,24,16,0
+HivaOa|-139,-9.8,22,8,70
+Rangiroa|-147.65,-15.1,42,12,70
+Fakarava|-145.6,-16.3,35,10,40
+Gambier|-134.95,-23.1,8,6,0
+Pitcairn|-130.1,-25.07,4,3,0
+Easter|-109.35,-27.12,14,9,30
+Isabela|-91,-0.7,72,30,340
+SantaCruz|-90.35,-0.65,28,24,0
+SanCristobal|-89.5,-0.85,28,12,60
+Fernandina|-91.5,-0.4,18,14,0
+JuanFernandez|-78.85,-33.65,12,6,70
+Chiloe|-73.9,-42.65,100,42,0
+Wellington|-74.7,-49.6,95,35,0
+TierraDelFuego|-68.7,-54.1,160,115,90
+Staten|-64.35,-54.8,32,10,90
+Marajo|-50.2,-1,110,90,0
+VanuatuSanto|167,-15.4,62,35,340
+Malekula|167.45,-16.25,48,22,340
+Efate|168.3,-17.7,28,16,0
+Tanna|169.4,-19.5,24,10,10
+Ambrym|168.1,-16.3,35,10,330
+Erromango|169.1,-18.8,35,15,0
+Guadalcanal|160.2,-9.6,85,25,300
+Malaita|161,-9,85,15,320
+SantaIsabel|159.6,-8,85,15,320
+Choiseul|157.1,-7.1,75,16,320
+NewGeorgia|157.6,-8.3,40,20,300
+Makira|162,-10.6,60,13,300
+Bougainville|155.3,-6.2,105,50,330
+NewIreland|152.7,-3.3,200,20,130
+NewHanover|150.2,-2.6,30,15,0
+Manus|147,-2.1,45,16,90
+NewBritainW|149.2,-5.9,125,42,40
+NewBritainE|151.2,-4.9,95,38,110
+Louisiade|152.5,-11.2,100,10,90
+DEntrecasteaux|150.7,-9.7,70,40,70
+NewCaledonia|165.5,-21.4,215,30,320
+Lifou|167.2,-20.9,40,14,0
+IsleOfPines|167.5,-22.6,14,10,0
+Norfolk|167.95,-29.05,6,4,0
+LordHowe|159.08,-31.55,6,3,0
+Stewart|167.85,-46.9,35,25,0
+Chatham|-176.5,-43.95,38,22,0
+GreatBarrier|175.4,-36.2,22,12,0
+Kerguelen|69.5,-49.3,110,80,0
+Crozet|51.7,-46.4,20,10,0
+Heard|73.5,-53.1,18,10,0
+Amsterdam|77.55,-37.85,8,5,0
+PrinceEdward|37.7,-46.9,12,7,0
+KangarooIs|137.2,-35.8,75,20,80
+KingIs|143.95,-39.9,20,8,0
+FlindersIs|148,-40,40,14,0
+MelvilleAU|130.5,-11.6,55,38,0
+Groote|136.6,-14,45,25,0
+Mornington|139.4,-16.6,30,18,0
+Fraser|153.1,-25.2,60,10,20
+Sicily|14.1,37.55,150,90,100
+Sardinia|9,40.05,135,60,0
+Corsica|9.1,42.15,95,38,10
+Crete|24.9,35.25,135,20,95
+Cyprus|33,35.05,120,40,80
+Mallorca|2.95,39.6,45,35,0
+Menorca|4.1,40,25,10,80
+Ibiza|1.4,39,20,10,40
+Malta|14.4,35.9,16,8,60
+Rhodes|28.1,36.2,40,15,40
+Lesbos|26.3,39.1,35,20,0
+Chios|26,38.4,22,12,0
+Euboea|23.9,38.5,85,12,130
+Corfu|19.7,39.6,25,12,30
+Kefalonia|20.55,38.2,28,15,30
+Zakynthos|20.9,37.8,15,10,0
+Cyclades|25.4,37.1,40,20,40
+Peloponnese|22.3,37.3,90,80,0
+Djerba|10.9,33.8,16,15,0
+KrkCres|14.4,44.8,50,15,150
+HvarBrac|16.6,43.3,60,10,100`;
+let ISLES=ISL.split("\n").filter(Boolean).map(l=>{const[n,v]=l.split("|"),[lo,la,a,b,r]=v.split(",").map(Number);return{n,lo,la,a,b,r:r||0}});
+function build(){
+const HW=W*HF,HH=H*HF;mkL=document.createElement("canvas");mkL.width=HW;mkL.height=HH;const mx=mkL.getContext("2d");
+const poly=s=>{const pts=rough(s.split(" ").map(t=>t.split(",").map(Number)));mx.beginPath();pts.forEach((p,k)=>{const X_=(p[0]+180)*RZ*HF,Y_=(90-p[1])*RZ*HF;k?mx.lineTo(X_,Y_):mx.moveTo(X_,Y_)});mx.closePath();mx.fillStyle="#fff";mx.fill()};
+LAND.forEach(poly);mx.globalCompositeOperation="destination-out";SEAS.forEach(poly);mx.globalCompositeOperation="source-over";
+const cover=()=>{const hd=mx.getImageData(0,0,HW,HH).data;ha=new Uint8Array(HW*HH);for(let i=0;i<ha.length;i++)ha[i]=hd[i*4+3];
+for(let j=0;j<H;j++)for(let i=0;i<W;i++){let t=0;for(let a=0;a<HF;a++)for(let b=0;b<HF;b++)t+=ha[(j*HF+a)*HW+i*HF+b];land[j*W+i]=t>=128*HF*HF?1:0}};
+cover();
+for(const c of CITY){const i=(((Math.floor((c[1]+180)*RZ))%W)+W)%W,j=Math.min(H-2,Math.max(1,Math.floor((90-c[2])*RZ)));land[j*W+i]=1}
+const landBase=land.slice();
+// Skip any island that is already (mostly) drawn by the outline data, so bays and straits are not filled in.
+ISLES=ISLES.filter(g=>{const t=g.r*Math.PI/180,sx=Math.sin(t),cx=Math.cos(t),klo=111.2*Math.max(.05,Math.cos(g.la*Math.PI/180));let tot=0,ld=0;
+for(let i=-10;i<=10;i++)for(let j=-10;j<=10;j++){const u=i/10*g.a,v=j/10*g.b;if((i/10)**2+(j/10)**2>1)continue;const e=u*sx+v*cx,n=u*cx-v*sx,x=Math.floor((g.lo+e/klo+180)*RZ),y=Math.floor((90-g.la-n/111.2)*RZ);tot++;if(y>0&&y<H-1&&landBase[y*W+((x%W)+W)%W])ld++}return g.b<60||ld/tot<.55});
+for(const g of ISLES){const t=g.r*Math.PI/180,sx=Math.sin(t),cx=Math.cos(t),klo=111.2*Math.max(.05,Math.cos(g.la*Math.PI/180)),a=Math.max(14,g.a),b=Math.max(14,g.b),pts=[];
+for(let i=0;i<=28;i++){const u=i/28*2*Math.PI,e=a*Math.cos(u)*sx+b*Math.sin(u)*cx,n=a*Math.cos(u)*cx-b*Math.sin(u)*sx;pts.push([g.lo+e/klo,g.la+n/111.2])}
+for(const o of[-360,0,360]){if(o&&Math.abs(g.lo)<160)continue;mx.beginPath();pts.forEach((p,k)=>{const X_=(p[0]+o+180)*RZ*HF,Y_=(90-p[1])*RZ*HF;k?mx.lineTo(X_,Y_):mx.moveTo(X_,Y_)});mx.closePath();mx.fillStyle="#fff";mx.fill()}}
+cover();for(let k=0;k<N;k++)if(landBase[k])land[k]=1;
+for(const g of ISLES){const t=g.r*Math.PI/180,sx=Math.sin(t),cx=Math.cos(t),klo=111.2*Math.max(.05,Math.cos(g.la*Math.PI/180)),ext=Math.max(g.a,g.b)+30,dla=ext/111.2,dlo=ext/klo,i0=Math.floor((g.lo-dlo+180)*RZ),i1=Math.floor((g.lo+dlo+180)*RZ),j0=Math.max(1,Math.floor((90-g.la-dla)*RZ)),j1=Math.min(H-2,Math.floor((90-g.la+dla)*RZ));
+for(let j=j0;j<=j1;j++){const la=90-(j+.5)/RZ;for(let i=i0;i<=i1;i++){const lo=-180+(i+.5)/RZ,dx=(lo-g.lo)*klo,dy=(la-g.la)*111.2,u=dx*sx+dy*cx,v=dx*cx-dy*sx;
+if((u/g.a)**2+(v/g.b)**2<=1||(Math.abs(v)<=.75*CS&&Math.abs(u)<=g.a+.2*CS))land[j*W+((i%W)+W)%W]=1}}
+const ci=(((Math.floor((g.lo+180)*RZ))%W)+W)%W,cj=Math.min(H-2,Math.max(1,Math.floor((90-g.la)*RZ)));land[cj*W+ci]=1}
+isl=new Uint8Array(N);for(let k=0;k<N;k++)isl[k]=land[k]&&!landBase[k]?1:0;
+const dObase=bfs(landBase,null);
+const sea=land.map(v=>1-v);nl=new Int32Array(N);no=new Int32Array(N);dO=bfs(land,nl);dL=bfs(sea,no);
+FL.forEach((f,fi)=>{for(let s=1;s<f.p.length;s++){const a=f.p[s-1],b=f.p[s],n=Math.ceil(Math.max(Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]))*RZ)+1;for(let q=0;q<=n;q++){const lo=a[0]+(b[0]-a[0])*q/n,la=a[1]+(b[1]-a[1])*q/n,i=((Math.floor((lo+180)*RZ)%W)+W)%W,j=Math.min(H-1,Math.max(0,Math.floor((90-la)*RZ)));fcell[j*W+i]=fi+1}}});
+fdist=bfs(fcell,fid);
+for(const rv of RV)for(let q=1;q<rv.p.length;q++){const a=rv.p[q-1],b=rv.p[q],n=Math.ceil(Math.max(Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]))*RZ)+1;for(let m=0;m<=n;m++)riv[idx(a[0]+(b[0]-a[0])*m/n,a[1]+(b[1]-a[1])*m/n)]=1}
+for(let j=0;j<H;j++){const lat=90-(j+.5)/RZ,ca=Math.abs(lat);for(let i=0;i<W;i++){const k=j*W+i,lon=-180+(i+.5)/RZ;
+if(land[k]){let e=5+Math.min(430,dL[k]*20/RZ);for(const r of RID){const dx=((lon-r[0]+540)%360)-180,dy=lat-r[1];if(Math.abs(dx)>4*r[2]||Math.abs(dy)>4*r[3])continue;e+=r[4]*Math.exp(-(dx*dx/(2*r[2]*r[2])+dy*dy/(2*r[3]*r[3])))}
+e+=(vn(i/(3*RZ),j/(3*RZ))-.5)*70+(vn(i/RZ,j/RZ)-.5)*50+(vn(i/(.4*RZ),j/(.4*RZ))-.5)*22;e+=(.5-Math.abs(vn(i/(.7*RZ),j/(.7*RZ))*2-1))*e*.3;if(riv[k])e=e*.45-10;if(isl[k])e=Math.max(e,50+160*vn(i/(.4*RZ),j/(.4*RZ)));elev[k]=Math.max(2,e)}
+else{let z=-(50+4400*(1-Math.exp(-dObase[k]/(4.5*RZ))));if(fdist[k]<=4*RZ){const t=FL[fcell[fid[k]]-1].t,g=Math.exp(-sq(fdist[k]/RZ)/4.5);if(t==="s")z-=3800*g;else if(t==="r")z+=1700*g}if(dObase[k]>=6&&dO[k]<dObase[k]&&dO[k]<=4)z=Math.max(z,-(60+500*(dO[k]-1)));elev[k]=Math.min(-15,z)}
+dep[k]=land[k]?0:Math.max(10,-elev[k]);
+if(land[k]){const e=elev[k],t=29-.0075*ca*ca-6.5*e/1000,cont=.4+.6*Math.exp(-dL[k]/(7*RZ));let p=(100+2300*Math.exp(-sq(lat/9))+1000*Math.exp(-sq((ca-47)/13)))*cont;
+if(lon>90&&lon<125&&lat>5&&lat<28)p+=900*cont;if(lon>85&&lon<95&&lat>22&&lat<28)p+=1500;p+=e*.25;
+T[k]=t;P[k]=p;cls[k]=t<-10?1:t<0?2:t<6?3:p<250?6:p<600?5:t>20?(p>1800?8:7):4}}}
+L1=[];L2=[];for(let k=W;k<N-W;k++)if(land[k]){if(dL[k]===1)L1.push(k);else if(dL[k]===2)L2.push(k)}
+for(let j=0;j<H;j++)for(let i=0;i<W;i++){const k=j*W+i,p=k*4,w=elev[j*W+(i+W-1)%W],e2=elev[j*W+(i+1)%W],n=elev[(j>0?j-1:j)*W+i],s=elev[(j<H-1?j+1:j)*W+i];
+let c1,c2;if(land[k]){const sh=Math.max(.65,Math.min(1.35,1-((w-e2)+(n-s))/(1200/RZ)));const lc=LUL[Math.min(409,elev[k]/16|0)],cc=CC[cls[k]],f=.6+.4*sh;c1=[lc[0]*sh,lc[1]*sh,lc[2]*sh];c2=[cc[0]*f,cc[1]*f,cc[2]*f]}else{c1=c2=LUO[Math.min(149,-elev[k]/32|0)]}
+for(let q=0;q<3;q++){bt[p+q]=c1[q];bc[p+q]=c2[q]}bt[p+3]=bc[p+3]=255}
+for(let j=0;j<H;j++)for(let i=0;i<W;i++){const k=j*W+i,e=j*W+(i+1)%W;if(!land[k]){if(!land[e])hu[k]=Math.min(6000,(dep[k]+dep[e])/2);if(j>0&&!land[k-W])hv[k]=Math.min(6000,(dep[k]+dep[k-W])/2)}}
+for(let y=0;y<CH;y++)for(let x=0;x<CW;x++){let n=0,t=0;for(let a=0;a<4;a++)for(let b=0;b<4;b++){const k=(y*4+a)*W+x*4+b;if(!land[k]){n++;t+=dep[k]}}cdep[y*CW+x]=n>=6?t/n:0}
+CITY.forEach(c=>{c.k=idx(c[1],c[2]);c.oc=-1;const x=c.k%W,y=(c.k/W)|0;let best=99;for(let a=-6;a<=6;a++)for(let b=-6;b<=6;b++){const n=(y+a)*W+(x+b+W)%W;if(n>=0&&n<N&&!land[n]&&Math.hypot(a,b)<best){best=Math.hypot(a,b);c.oc=n}}
+c.cq=-1;if(c.oc>=0){const cx=(c.oc%W)>>2,cy=((c.oc/W)|0)>>2;let bb=99;for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++){const yy=cy+a;if(yy<0||yy>=CH)continue;const i=yy*CW+(cx+b+CW)%CW;if(cdep[i]>0&&Math.hypot(a,b)<bb){bb=Math.hypot(a,b);c.cq=i}}}
+c.arr=null;c.mx=0;c.rec=[];c.lv=0;c.pe=0;c.pr=0;c.pk=0});
+for(let j=2;j<H-2;j++)for(let i=0;i<W;i++){const k=j*W+i;if(!land[k])continue;const e=elev[k];let m=0;for(const[a,b]of[[-2,0],[2,0],[0,-2],[0,2],[-2,-2],[-2,2],[2,-2],[2,2]])m+=Math.max(0,elev[(j+a)*W+(i+b+W)%W]);const rel=e-m/8;
+let a=e<60?.9:e<200?.6:e<600?.2:e>1800?-.45:e>1000?-.2:0;a+=rel<0?Math.min(.8,-rel/120):Math.min(.25,rel/500);if(riv[k])a+=.5;amp[k]=Math.max(-.6,Math.min(1.8,a))}
+mkST();initFW();CO=[];for(let k=W;k<N-W;k++)if(!land[k]&&dO[k]===1)CO.push(k);hiT=hiBase(bt);
+}
+const S={mode:"q",run:true,q:null,tsu:null,storms:[],th:0,wet:0,lay:0,dirty:true,fr:0};
+const mkc=(w,h)=>{const c=document.createElement("canvas");c.width=w;c.height=h;return c},fcO=mkc(W,H),fcL=mkc(W,H),xO=fcO.getContext("2d"),xL=fcL.getContext("2d"),imO=xO.createImageData(W,H),imL=xL.createImageData(W,H),OD=imO.data,LD=imL.data,comp=mkc(2,2),cx2=comp.getContext("2d"),WL=[0,1].map(()=>{const c=mkc(W,H),x=c.getContext("2d"),im=x.createImageData(W,H);return{c,x,im,d:im.data,comp:mkc(2,2)}}),tmp=mkc(2,2),tx=tmp.getContext("2d");let lastKey="";
+const cv=$("cv"),ctx=cv.getContext("2d"),view={cx:0,cy:12,z:1};let cw=1,ch=1,sc=1;
+const X=lo=>cw/2+(lo-view.cx)*sc,Y=la=>ch/2-(la-view.cy)*sc;
+function size(){const r=$("map").getBoundingClientRect(),d=devicePixelRatio||1;cw=r.width;ch=r.height;cv.width=cw*d;cv.height=ch*d;ctx.setTransform(d,0,0,d,0,0);comp.width=tmp.width=cv.width;comp.height=tmp.height=cv.height;WL.forEach(w=>{w.comp.width=cv.width;w.comp.height=cv.height;w.comp.getContext("2d").setTransform(d,0,0,d,0,0)});cx2.setTransform(d,0,0,d,0,0);tx.setTransform(d,0,0,d,0,0);lastKey=""}
+const MLUT=[];for(let i=0;i<=80;i++)MLUT.push(ramp(MR,3.5+i*.1));const HOT=[255,90,40],COLD=[40,220,255],PUR=[168,85,247],RED=[255,61,90],YEL=[255,214,10],WET=[30,110,235];
+const SC=(D,k,c,a)=>{const p=k*4;D[p]=c[0];D[p+1]=c[1];D[p+2]=c[2];D[p+3]=a*255};
+const LC=[null,YEL,RED,PUR],fru=new Float32Array(N),fat=new Float32Array(N).fill(1e9);
+function paintBG(e,t,tr){const L=rupLen(e.M),dm=1.5*(e.Me-e.M),Rk=Math.min(2500,10**((2+1.5*e.M+Math.abs(dm))/3.5)-10),cy=((90-e.lat)*RZ)|0,cx=((e.lon+180)*RZ)|0,rr=Math.ceil(Rk/CS);
+for(let a=-rr;a<=rr;a++){const y=cy+a;if(y<1||y>=H-1)continue;const cl=cosR[y]*CS,rx=Math.ceil(rr/Math.max(.2,cosR[y]));for(let b=-rx;b<=rx;b++){const x=(cx+b+W)%W,k=y*W+x;if(!land[k])continue;const d=Math.hypot(b*cl,a*CS);if(d>Rk)continue;const mo=estimateMMI(e.M,Math.hypot(Math.max(0,d-L/2),e.dep),amp[k]),m=d/3.9<=t?mo:tr?0:mo+dm+(((k*2654435761)>>>0)%1000/1000-.5)*.5;if(m>=3.5)SC(LD,k,MLUT[Math.min(80,(m-3.5)*10|0)],.7)}}}
+function paintEEW(){const q=S.q,ts=S.tsu,F=S.focus||"all",qin=F==="all"||F==="q";
+if(q&&qin&&q.t>=q.ti){const rv=q.rev,dm=1.5*(q.Me-q.M);for(let k=0;k<N;k++){if(!land[k]||mmi[k]<2)continue;const m=dist[k]<rv?mmi[k]:mmi[k]+dm+(((k*2654435761)>>>0)%1000/1000-.5)*.6;if(m>=3.5)SC(LD,k,MLUT[Math.min(80,(m-3.5)*10|0)],.72)}}
+for(const e of BG){if(F!=="all"&&e.id!==F)continue;const t=S.now-e.t0;if(t>=e.ti&&t<=e.life&&e.Me>=4.8)paintBG(e,t)}
+for(const b of BTS){if(F!=="all"&&b.id!==F)continue;if(S.now-b.e.t0<b.tI||!b.AMm)continue;const gd=Math.floor(Math.max(0,S.now-b.e.t0-(b.mxw||b.mx))/5400);for(let i=0;i<b.kk.length;i++){const l=lvl(b.AMm*b.ek[i])-gd;if(l>0)SW(b.kk[i],l)}}
+if(ts&&q&&qin&&q.fcDone)for(const a of[L1,L2])for(const k of a){const v=maxE[no[k]]>.1?ru[k]:fru[k],l=lvl(v)-(S.dq||0);if(l>0)SW(k,l)}}
+const SW=(k,l)=>{SC(l>=2?WL[1].d:WL[0].d,k,LC[l],l>=2?.95:.8);if(l>S.wmax)S.wmax=l};
+function paint(){OD.fill(0);LD.fill(0);WL.forEach(w=>w.d.fill(0));S.wmax=0;const q=S.q,ts=S.tsu,al=AL();
+if(S.nerv)paintEEW();else{
+if(q||S.wet){const rv=q?q.rev:0;for(let k=0;k<N;k++){if(!land[k])continue;if(q&&mmi[k]>=3.5&&dist[k]<rv)SC(LD,k,MLUT[Math.min(80,(mmi[k]-3.5)*10|0)],.75);if(wd[k]>.05)SC(LD,k,WET,.4+.6*Math.min(1,wd[k]/2))}}
+for(const e of BG){if(!e.sig)continue;const t=S.now-e.t0;if(t>=0&&t<=e.life)paintBG(e,t,1)}
+if(ts){const D=ts.done?maxE:eta;for(let k=0;k<N;k++){const e=D[k];if(e>.03||e<-.03)SC(OD,k,e>0?HOT:COLD,Math.min(.9,Math.abs(e)/1.2))}
+if(al)for(const a of[L1,L2])for(const k of a){const v=ru[k];{const l=lvl(v)-(S.dq||0);if(l>0)SW(k,l)}}}}
+for(const k of CO){const m=nl[k]*4;if(LD[m+3]){const p=k*4;LD[p]=LD[m];LD[p+1]=LD[m+1];LD[p+2]=LD[m+2];LD[p+3]=LD[m+3]}}
+for(const k of L1){const m=no[k]*4;if(OD[m+3]){const p=k*4;OD[p]=OD[m];OD[p+1]=OD[m+1];OD[p+2]=OD[m+2];OD[p+3]=OD[m+3]}}
+for(const w of WL){const D=w.d;for(const k of CO){const m=nl[k]*4;if(D[m+3]){const p=k*4;D[p]=D[m];D[p+1]=D[m+1];D[p+2]=D[m+2];D[p+3]=D[m+3]}}w.x.putImageData(w.im,0,0)}
+xO.putImageData(imO,0,0);xL.putImageData(imL,0,0);S.ovd=true}
+const FC={s:"#ff3d5a",t:"#ffb020",c:"#ff7a1a",r:"#b36bff"};
+function draw(){sc=Math.min(cw/360,ch/180)*view.z;ctx.fillStyle="#0a1d2e";ctx.fillRect(0,0,cw,ch);ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(S.lay?(hiC=hiC||hiBase(bc)):hiT,X(-180),Y(90),360*sc,180*sc);if(S.nerv){ctx.fillStyle="rgba(6,12,20,.62)";ctx.fillRect(0,0,cw,ch)}{const key=view.cx+","+view.cy+","+view.z+","+cw+","+ch;if(S.ovd||key!==lastKey){recomp();lastKey=key;S.ovd=false}}ctx.drawImage(comp,0,0,cw,ch);{const al=AL();if(al&&S.wmax>0){ctx.drawImage(WL[0].comp,0,0,cw,ch);if(S.wmax>=2){const ph=Math.floor(performance.now()/(S.wmax>=3?200:380))%2;ctx.globalAlpha=ph?1:.08;ctx.drawImage(WL[1].comp,0,0,cw,ch);ctx.globalAlpha=1}}}
+if(!S.nerv&&$("vr").checked&&view.z>=1.3){ctx.strokeStyle="#5ab4ff";ctx.lineWidth=1.2;for(const rv of RV){ctx.beginPath();rv.p.forEach((p,i)=>i?ctx.lineTo(X(p[0]),Y(p[1])):ctx.moveTo(X(p[0]),Y(p[1])));ctx.stroke()}}
+if(!S.nerv&&$("fl").checked){ctx.lineWidth=1.5;ctx.lineJoin="round";for(const f of FL){if(f.m&&view.z<2.2)continue;ctx.lineWidth=f.m?1:1.6;ctx.strokeStyle=FC[f.t];for(const o of[-360,0,360]){ctx.beginPath();f.p.forEach((p,i)=>i?ctx.lineTo(X(p[0]+o),Y(p[1])):ctx.moveTo(X(p[0]+o),Y(p[1])));ctx.stroke()}}}
+ctx.font="11px system-ui";if(S.nerv||$("ct").checked)for(const c of CITY){const x=X(c[1]),y=Y(c[2]);if(x<-20||x>cw+20||y<-20||y>ch+20)continue;const lvv=S.nerv?(c.ev||0):c.lv;if(lvv&&AL()){const ph=Math.floor(performance.now()/(lvv>=3?220:420))%2;if(lvv<2||ph){ctx.strokeStyle=ALC[lvv];ctx.lineWidth=lvv>=3?3:2;ctx.beginPath();ctx.arc(x,y,lvv>=3?9:7,0,7);ctx.stroke()}}
+ctx.globalAlpha=c.oc<0?.55:1;ctx.fillStyle=c[3]?"#ffd60a":"#fff";ctx.strokeStyle="#000";ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,c[3]?3:2.5,0,7);ctx.fill();ctx.stroke();if(view.z>=(c[3]?2.5:3.5)||(lvv&&AL())){ctx.fillStyle="#fff";ctx.fillText(c[0],x+6,y-5)}if(c.mx>.08&&AL()&&(!S.nerv||c.arr!=null)){ctx.fillStyle="#ff9f1c";ctx.fillText((S.nerv?4*c.mx:c.mx).toFixed(1)+" m",x+6,y+9)}}ctx.globalAlpha=1;
+if(!S.nerv&&$("vr").checked&&view.z>=1.5)for(const v of VOL){const x=X(v[1]),y=Y(v[2]);if(x<-9||x>cw+9||y<-9||y>ch+9)continue;ctx.fillStyle="#ff5a1f";ctx.strokeStyle="#000";ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(x,y-5);ctx.lineTo(x-4,y+3);ctx.lineTo(x+4,y+3);ctx.closePath();ctx.fill();ctx.stroke();if(view.z>=4){ctx.fillStyle="#fff";ctx.fillText(v[0],x+6,y+3)}}
+if(view.z<5){ctx.fillStyle="#ffffffaa";ctx.font="italic 11px system-ui";for(const l of SEAL)ctx.fillText(l[0],X(l[1])-30,Y(l[2]));ctx.font="11px system-ui"}
+const mp=S.nerv?null:(S.hv||S.pr);if(S.nerv)drawEEW();if(mp){const x=X(mp.lon),y=Y(mp.lat);ctx.strokeStyle="#5ce1e6";ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,8,0,7);ctx.moveTo(x-13,y);ctx.lineTo(x+13,y);ctx.moveTo(x,y-13);ctx.lineTo(x,y+13);ctx.stroke()}
+for(const s of S.nerv?[]:S.storms){ctx.strokeStyle="#5ab0ff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(X(s.lon),Y(s.lat),s.r/111*sc,0,7);ctx.stroke()}
+if(S.q&&(!S.nerv||S.focus==="all"||S.focus==="q"||!S.focus)){const q=S.q,r=6+(S.fr%30)/2;ctx.lineCap="round";for(const o of[-360,0,360]){ctx.beginPath();q.pts.forEach((p,i)=>i?ctx.lineTo(X(p[0]+o),Y(p[1])):ctx.moveTo(X(p[0]+o),Y(p[1])));ctx.strokeStyle="#fff";ctx.lineWidth=5;ctx.stroke();ctx.strokeStyle="#ff3d5a";ctx.lineWidth=2.5;ctx.stroke()}if(q.t<q.tmax)for(const[v,col]of[[6.8,"#4cc9f0"],[3.9,"#ff9f1c"]])if(v*q.t>q.depth){ctx.strokeStyle=col;ctx.lineWidth=2.4;ring(q.lat,q.lon,Math.sqrt((v*q.t)**2-q.depth**2))}ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.beginPath();ctx.arc(X(q.lon),Y(q.lat),r,0,7);ctx.stroke();ctx.fillStyle="#ff3d5a";ctx.beginPath();ctx.arc(X(q.lon),Y(q.lat),3,0,7);ctx.fill()}drawFx()}
+function star(x,y,r){ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(x+Math.cos(a)*rr,y+Math.sin(a)*rr)}ctx.closePath()}
+function drawFx(){const F=S.focus||"all",nv=S.nerv;
+for(const e of BG){if(nv&&F!=="all"&&e.id!==F)continue;const t=S.now-e.t0;if(t<0||t>e.life||e.M<5)continue;if(!nv&&!e.sig&&t>60)continue;const col=BGC[e.kind];
+if(e.pts&&e.pts.length>1){ctx.lineCap="round";for(const o of[-360,0,360]){ctx.beginPath();e.pts.forEach((p,i)=>i?ctx.lineTo(X(p[0]+o),Y(p[1])):ctx.moveTo(X(p[0]+o),Y(p[1])));ctx.strokeStyle="#fff";ctx.lineWidth=3.5;ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=1.8;ctx.stroke()}}
+if(t<600)for(const[v,c2]of[[6.8,"#4cc9f0"],[3.9,"#ff9f1c"]])if(v*t>e.dep){ctx.strokeStyle=c2;ctx.lineWidth=1.8;ring(e.lat,e.lon,Math.sqrt((v*t)**2-e.dep**2))}}
+if(S.home)drawHome();
+if(!nv)for(const e of BG){const t=S.now-e.t0;if(t<0||t>e.life)continue;const x=X(e.lon),y=Y(e.lat);if(x<-60||x>cw+60||y<-20||y>ch+20)continue;const col=BGC[e.kind]||"#fff",r=Math.max(3,Math.min(14,2.5+(e.M-3.5)*2.2));ctx.fillStyle=col+"55";ctx.strokeStyle=e.sig?"#fff":col;ctx.lineWidth=e.sig?2:1.2;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();if(S.sel===e){ctx.strokeStyle="#ffd60a";ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y,r+5,0,7);ctx.stroke();ctx.strokeStyle=e.sig?"#fff":col}ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,2.2,0,7);ctx.fill();
+if(e.sig||view.z>=3){ctx.font="bold 11px system-ui";const tx=`M${e.M.toFixed(1)} · ${Math.round(e.dep)} km`+(e.bt?" · tsunami":e.cm>=7?` · MMI ${ro(e.cm)} ${e.cc}`:"");ctx.lineWidth=3;ctx.strokeStyle="#000";ctx.strokeText(tx,x+r+3,y+4);ctx.fillStyle="#fff";ctx.fillText(tx,x+r+3,y+4);ctx.font="11px system-ui"}}
+{let o=null,fe=null;if(S.q&&(F==="all"||F==="q")){const q=S.q;o=nv?mmObs(q,q.t,q.depth):(q.mmx>0?{v:q.mmx,k:q.mxk}:null)}else if(nv&&typeof F==="number"){fe=BG.find(e=>e.id===F);if(fe){evMM(fe);o=mmObs(fe,S.now-fe.t0,fe.dep)}}
+if(o&&o.v>=2.5){const lo=-180+(o.k%W+.5)/RZ,la=90-(((o.k/W)|0)+.5)/RZ,x=X(lo),y=Y(la);ctx.fillStyle="#ffe14d";ctx.strokeStyle="#000";ctx.lineWidth=1.5;star(x,y,9);ctx.fill();ctx.stroke();ctx.fillStyle="#fff";ctx.font="bold 11px system-ui";ctx.fillText("MMI "+ro(o.v),x+11,y+4);ctx.font="11px system-ui"}}}
+function hit(lo,la){return[((lo+540)%360)-180,la]}
+function scr2ll(x,y){return[view.cx+(x-cw/2)/sc,view.cy-(y-ch/2)/sc]}
+function clearQ(){S.q=null;S.tsu=null;eta.fill(0);uu.fill(0);vv.fill(0);maxE.fill(0);tsuSrc.fill(0);tsuAmp.fill(0);et.fill(1e9);arrT.fill(-1);pkT.fill(0);if(S.pr)S.pr.rec=[];inund.fill(0);ru.fill(0);CITY.forEach(c=>{c.arr=null;c.mx=0;c.rec=[];c.lv=0;c.pe=0;c.pr=0;c.pk=0;c.sh=null;c.fm=null;c.ev=0;c.fl=0;c.fpr=0;c.fpe=0})}
+// Simplified global intensity estimate: geometric spreading plus anelastic distance decay.
+// Site response is deliberately restrained; this is a gameplay approximation, not a regional GMPE.
+function estimateMMI(M,R,site=0){const r=Math.max(0,R);return Math.max(1,Math.min(11,3.7+1.5*M-3.5*Math.log10(r+10)-.0042*Math.max(0,r-80)+.55*site))}
+// Finite-rupture length scaling: gentler magnitude exponent and 550 km ceiling avoid unrealistically long single-segment ruptures at M9+.
+// Tsunami forecast scaling calibrated against this simulation: near-field runup is about the source amplitude, and the far-field floor stays near 0.3x of it instead of decaying away.
+const tsuLoss=new Float32Array((W>>2)*(H>>2)),tsuRate=d=>d<120?1/350:d<500?1/2500:1/5000;
+// The sea-floor grid is too coarse to resolve shallow shelf seas, so enclosed or shielded basins get an extra attenuation rate (per km of path inside them). lon0,lon1,lat0,lat1,rate.
+const TZN=[[99.3,105.8,5.5,13.9,1/90],[98.9,104.8,.6,5.9,1/350],[104.2,117.8,-8.2,-.8,1/110],[102.8,110.5,6,12.2,1/150],[105.5,121.5,8,21.5,1/1400],[107.5,117,17.5,23.8,1/220],[118.5,127.5,24.5,40.5,1/200],[65.5,74.5,17,26.5,1/280],[119.5,122.4,13.2,15.4,1/110],[134.8,137.3,33.9,35.1,1/200],[131,134.8,33.5,34.6,1/150],[138,141.7,41.2,45.5,1/250],[30,37.5,12,30.5,1/80],[-6,36.5,30.5,46.5,1/60],[9,30.5,53,66,1/60],[-5,9,50.5,60.5,1/150],[47,57.5,24,30.5,1/60],[170,180,60,72,1/40],[-180,-155,60,72,1/40],[-75,-50,-66,-54,1/300],[-86,-59,9.8,23,1/90],[-98,-80.5,18,31,1/60]];
+let TZR=null;function tzInit(){TZR=new Float32Array(CW*CH);for(let y=0;y<CH;y++){const la=90-(y*4+2.5)/RZ;for(let x=0;x<CW;x++){const lo=-180+(x*4+2.5)/RZ;let r=0;for(const z of TZN)if(lo>=z[0]&&lo<=z[1]&&la>=z[2]&&la<=z[3]&&z[4]>r)r=z[4];TZR[y*CW+x]=r}}}
+const rupLen=M=>Math.min(550,Math.max(8,10**(.55*M-2.25)));
+const RN=["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII"];
+function rupt(k,L){const lo=-180+(k%W+.5)/RZ,la=90-(((k/W)|0)+.5)/RZ,f=fid[k]>=0&&fdist[k]<=2*RZ?FL[fcell[fid[k]]-1]:null,c=111.2*Math.cos(la*Math.PI/180),stp=Math.max(6,L/24);
+if(!f){const a=hash(k,7)*Math.PI,dx=Math.cos(a)*L/2/c,dy=Math.sin(a)*L/2/111.2;return[[lo-dx,la-dy],[lo,la],[lo+dx,la+dy]]}
+const P=[];let s=0;for(let i=1;i<f.p.length;i++){const a=f.p[i-1],b=f.p[i],cl=111.2*Math.cos((a[1]+b[1])*Math.PI/360),sl=Math.hypot((b[0]-a[0])*cl,(b[1]-a[1])*111.2),n=Math.max(1,Math.ceil(sl/stp));for(let m=0;m<n;m++)P.push([a[0]+(b[0]-a[0])*m/n,a[1]+(b[1]-a[1])*m/n,s+sl*m/n]);s+=sl}
+const e=f.p[f.p.length-1];P.push([e[0],e[1],s]);let bi=0,bd=1e9;P.forEach((p,i)=>{const d=Math.hypot((((p[0]-lo+540)%360)-180)*c,(p[1]-la)*111.2);if(d<bd){bd=d;bi=i}});
+const a0=Math.max(0,Math.min(P[bi][2]-L/2,s-L)),a1=Math.min(s,a0+L),out=P.filter(p=>p[2]>=a0&&p[2]<=a1);return out.length>1?out:[[lo,la],[lo+.02,la]]}
+function fcAmp(AM,r0,d,lo,la){const q=S.q,p=q.pts,a=p[0],b=p[p.length-1],cl=Math.cos(q.lat*Math.PI/180),sx=(((b[0]-a[0]+540)%360)-180)*cl,sy=b[1]-a[1],dx=(((lo-q.lon+540)%360)-180)*cl,dy=la-q.lat,sl=Math.hypot(sx,sy)||1,dl=Math.hypot(dx,dy)||1,sn=Math.abs((sx*dy-sy*dx)/(sl*dl));return 2.5*AM*Math.pow(r0/(r0+d),.8)*(.35+.65*sn)}
+function eew(AM,sg){et.fill(1e9);tsuAmp.fill(0);const hk=[],hn=[];
+const push=(t,v)=>{let i=hk.length;hk.push(t);hn.push(v);while(i>0){const p=(i-1)>>1;if(hk[p]<=t)break;hk[i]=hk[p];hn[i]=hn[p];i=p}hk[i]=t;hn[i]=v};
+const pop=()=>{const t=hk[0],v=hn[0],lt=hk.pop(),lv=hn.pop(),n=hk.length;if(n){let i=0;for(;;){let c=2*i+1;if(c>=n)break;if(c+1<n&&hk[c+1]<hk[c])c++;if(hk[c]>=lt)break;hk[i]=hk[c];hn[i]=hn[c];i=c}hk[i]=lt;hn[i]=lv}return[t,v]};
+// Seed the travel-time solver only where the rupture displaced the seabed.
+tsuLoss.fill(0);if(!TZR)tzInit();for(let y=0;y<CH;y++)for(let x=0;x<CW;x++){const i=y*CW+x,k=(y*4+2)*W+x*4+2;if(cdep[i]>0&&Math.abs(tsuSrc[k])>AM*.035){et[i]=0;push(0,i)}}
+while(hk.length){const[t,i]=pop();if(t>et[i])continue;const x=i%CW,y=(i/CW)|0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){if(!a&&!b)continue;const yy=y+a;if(yy<0||yy>=CH)continue;const j=yy*CW+(x+b+CW)%CW;if(cdep[j]<=0)continue;
+const sk=Math.hypot(b*CS*4*cosR[y*4+2],a*CS*4),nt=t+sk*1000/Math.sqrt(9.81*(Math.max(20,cdep[i])+Math.max(20,cdep[j]))/2);if(nt<et[j]){et[j]=nt;tsuLoss[j]=tsuLoss[i]+sk*(tsuRate((cdep[i]+cdep[j])/2)+TZR[j]);push(nt,j)}}}
+// Long-distance amplitude decays along the connected ocean path, not through land or across the globe.
+for(let y=0;y<CH;y++)for(let x=0;x<CW;x++){const i=y*CW+x,t=et[i];if(t>=1e8)continue;const k=(y*4+2)*W+x*4+2;tsuAmp[k]=AM*Math.exp(-tsuLoss[i]-Math.max(0,t-64800)/18000)/4}
+for(const c of CITY){if(c.cq>=0&&et[c.cq]<1e8){c.pe=et[c.cq];const k=(c.cq/CW|0)*4*W+(c.cq%CW)*4;let near=0;for(let a=0;a<4;a++)for(let b=0;b<4;b++)near=Math.max(near,tsuAmp[k+a*W+b]);c.pr=near*4;c.lv=lvl(c.pr)}else{c.pe=0;c.pr=0;c.lv=0}}}
+// Finite-rupture length scaling: a gentler magnitude exponent and 550 km ceiling avoid unrealistically long single-segment ruptures at M9+. This is a gameplay approximation; real rupture dimensions vary by fault and event.
+const pnC={};function pnk(k){if(pnC[k]===undefined)pnC[k]=placeName(90-(((k/W)|0)+.5)/RZ,-180+(k%W+.5)/RZ);return pnC[k]}
+function ubound(ds,r){let lo=0,hi=ds.length;while(lo<hi){const m=(lo+hi)>>1;if(ds[m]<=r)lo=m+1;else hi=m}return lo}
+function mmObs(o,t,dep){if(!o.lc||!o.lc.length)return null;const r2=(3.9*t)**2-dep*dep;if(r2<=0)return null;const n=ubound(o.ds,Math.sqrt(r2));return n?{v:o.pm[n-1],k:o.pk[n-1]}:null}
+function mmFc(o,Me,dep,dfun){if(!o.lc||!o.lc.length)return null;const key=Math.round(Me*50);if(o.fck===key)return o.fcv;let v=0,kk=-1;for(let i=0;i<o.lc.length;i++){const m=dfun(i,Me);if(m>v){v=m;kk=o.lc[i]}}o.fck=key;o.fcv={v,k:kk};return o.fcv}
+function buildMM(o,cells,distOf,mmOf){cells.sort((a,b)=>distOf(a)-distOf(b));o.lc=Int32Array.from(cells);o.ds=Float32Array.from(cells,distOf);o.pm=new Float32Array(cells.length);o.pk=new Int32Array(cells.length);let v=0,kk=-1;for(let i=0;i<cells.length;i++){const m=mmOf(cells[i]);if(m>v){v=m;kk=cells[i]}o.pm[i]=v;o.pk[i]=kk}o.mmx=v;o.mxk=kk}
+function evMM(e){if(e.lc)return;const L=rupLen(e.M),k0=idx(e.lon,e.lat),cx=k0%W,cy=(k0/W)|0,rr=22,cells=[];for(let a=-rr;a<=rr;a++){const y=cy+a;if(y<1||y>=H-1)continue;for(let b=-rr;b<=rr;b++){const k=y*W+(cx+b+W)%W;if(land[k]&&Math.hypot(a*CS,b*CS*cosR[y])<=600)cells.push(k)}}
+const de=k=>hav(e.lat,e.lon,90-(((k/W)|0)+.5)/RZ,-180+(k%W+.5)/RZ);buildMM(e,cells,de,k=>estimateMMI(e.M,Math.hypot(Math.max(0,de(k)-L/2),e.dep),amp[k]));e.dfc=(i,Me)=>{const k=e.lc[i];return estimateMMI(Me,Math.hypot(Math.max(0,e.ds[i]-rupLen(Me)/2),e.dep),amp[k])}}
+function mmRow(f,o,pl){const fs=f?ro(f.v):"—",os=o?ro(o.v):"none yet";return`<div class="nvh" style="margin-top:8px"><span>Max intensity (any location)</span><span>MMI</span></div><div class="nr"><span>Max MMI</span><span>forecast <b>${fs}</b> · observed so far <b>${os}</b>${o&&o.v>=2.5?" · "+pnk(o.k):""}</span></div>`}
+function startQuake(lon,lat){if($("lv").checked)return;clearQ();let k=epiCell(lon,lat);
+const M=+$("mag").value,depth=+$("depth").value,el=-180+(k%W+.5)/RZ,ea=90-(((k/W)|0)+.5)/RZ,L=rupLen(M),pts=rupt(k,L),n=pts.length,px=new Float64Array(n),py=new Float64Array(n);
+pts.forEach((p,i)=>{px[i]=((p[0]+540)%360)-180;py[i]=p[1]});
+for(let y=0;y<H;y++){const la=90-(y+.5)/RZ,cl=111.2*cosR[y];for(let x=0;x<W;x++){const lo=-180+(x+.5)/RZ;let m=1e12;for(let i=0;i<n;i++){let dx=lo-px[i];if(dx>180)dx-=360;else if(dx<-180)dx+=360;dx*=cl;const dy=(la-py[i])*111.2,d=dx*dx+dy*dy;if(d<m)m=d}
+const q=y*W+x,d=Math.sqrt(m);dist[q]=d;mmi[q]=land[q]?estimateMMI(M,Math.hypot(d,depth),amp[q]):1}}
+const mmc=[];for(let q=0;q<N;q++)if(land[q]&&mmi[q]>=2.5)mmc.push(q);const mmo={};buildMM(mmo,mmc,q=>dist[q],q=>mmi[q]);
+let a5=0,a7=0;for(let q=0;q<N;q++)if(land[q]){const ar=CS*CS*cosR[(q/W)|0];if(mmi[q]>=5)a5+=ar;if(mmi[q]>=7)a7+=ar}
+const ff=fid[k]>=0?FL[fcell[fid[k]]-1]:null;S.q={M,L,k,lon:el,lat:ea,depth,fault:ff?ff.n:"Unmapped area",faultType:ff?({s:"Subduction",t:"Transform",c:"Convergent",r:"Rift / ridge"}[ff.t]):"Unmapped",lc:mmo.lc,ds:mmo.ds,pm:mmo.pm,pk:mmo.pk,mmx:mmo.mmx,mxk:mmo.mxk,rev:0,t:0,tmax:1540,ti:8,Me:M-1.5,rt0:performance.now(),pts,a5,a7};CITY.forEach(c=>{c.dp=hav(ea,el,c[2],c[1])});ST.forEach(s=>{const d=Math.hypot(hav(ea,el,s.lat,s.lon),depth);s.tp=d/6.8+s.dl;s.dS=d/3.9});{const tp=ST.map(s=>s.tp).sort((a,b)=>a-b);S.q.ti=tp[2]+3;S.q.t1=tp[0];S.q.seed=Math.random()*1000;S.q.first=ST.find(s=>s.tp===tp[0])}
+S.as=$("ash").checked&&M>=5.4?{t0:S.now,M,L,pts,K:Math.max(.5,Math.pow(10,M-1.2-4.2))/600}:null;
+if($("db").checked&&M>=6.5&&Math.random()<.5){const pp=pts[pts.length-1];sched(30+Math.random()*270,()=>newEvent({kind:"doub",M:M+(Math.random()-.6)*.5,lon:((pp[0]+540)%360)-180,lat:pp[1],dep:depth}))}
+if($("ts").checked&&elev[k]<-30&&M>=6.8){const AM=.4*10**(.6*(M-7))*Math.exp(-depth/120),sg=Math.max(35,Math.min(90,L*.07)),srcW=Math.max(35,Math.min(85,L*.035));let y0=H,y1=0;
+// Initial sea-floor displacement follows the finite rupture, rather than a circular epicentral blob.
+// The weak negative shoulder represents adjacent subsidence; this is a simplified source model.
+for(let q=0;q<N;q++)if(!land[q]){const d=dist[q],g=Math.exp(-.5*sq(d/srcW)),shoulder=.22*Math.exp(-.5*sq(d/(srcW*2.7))),z=AM*(g-shoulder);if(Math.abs(z)>.008){tsuSrc[q]=z;eta[q]=z;const y=(q/W)|0;if(y<y0)y0=y;if(y>y1)y1=y}}
+S.tsu={t:0,done:false,em:AM,sg,n:0,ra0:Math.max(1,y0-3),ra1:Math.min(H-2,y1+3)};eew(AM,sg);$("hint").textContent="Tsunami running. Hover over the map to read wave heights (on a phone, Touch read mode is now on: drag one finger to read, two fingers to pan and zoom). Untick it to place another quake.";$("rd").checked=true;
+const bb=CITY.map((c,i)=>[c.pr,i]).sort((a,b)=>b[0]-a[0])[0];if(bb&&bb[0]>0)$("gs").value=bb[1]}
+S.run=true;$("pp").textContent="Pause";report();gauge();S.dirty=true}
+function addStorm(lon,lat){S.storms.push({lon,lat,r:+$("rad").value,rate:+$("rate").value,left:+$("dur").value});S.run=true;$("pp").textContent="Pause"}
+function swe(dt){const g=9.81,cy=g*dt/(CS*1000),iy=dt/(CS*1000),ts=S.tsu,T0=ts.t,r0=ts.ra0,r1=ts.ra1,gn=.0088*dt;
+for(let j=r0;j<=r1;j++){const cx=g*dt/dxr[j],o=j*W;for(let i=0;i<W;i++){const k=o+i,e=i===W-1?o:k+1,hx=hu[k],hy=hv[k];
+if(hx>0){let u=uu[k]-cx*(eta[e]-eta[k]);if(hx<300)u/=1+gn*Math.abs(u)/(hx*Math.cbrt(hx));uu[k]=u*.9998}
+if(hy>0){let u=vv[k]-cy*(eta[k-W]-eta[k]);if(hy<300)u/=1+gn*Math.abs(u)/(hy*Math.cbrt(hy));vv[k]=u*.9998}}}
+let em=0;for(let j=r0;j<=r1;j++){const ix=dt/dxr[j],o=j*W;for(let i=0;i<W;i++){const k=o+i,w=i===0?o+W-1:k-1;let v=eta[k]-ix*(hu[k]*uu[k]-hu[w]*uu[w])-iy*(hv[k]*vv[k]-hv[k+W]*vv[k+W]);const d=dep[k];if(d<80&&v>.3*d)v=.3*d+(v-.3*d)*.6;if(v>40)v=40;else if(v<-40)v=-40;eta[k]=v;if(v>maxE[k]){maxE[k]=v;pkT[k]=T0;if(v>.05&&arrT[k]<0)arrT[k]=T0}if(v>em)em=v}}
+ts.t+=dt;ts.em=em;if(++ts.n%2===0){ts.ra0=Math.max(1,r0-1);ts.ra1=Math.min(H-2,r1+1)}}
+function inundate(){for(const k of L1){let m=0;const x=k%W,y=(k/W)|0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const n=(y+a)*W+(x+b+W)%W;if(!land[n]&&maxE[n]>m)m=maxE[n]}ru[k]=m*4}
+for(const k of L2){let m=0;const x=k%W,y=(k/W)|0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const n=(y+a)*W+(x+b+W)%W;if(land[n]&&dL[n]===1&&ru[n]>m)m=ru[n]}ru[k]=m*.55}
+for(const a of[L1,L2])for(const k of a){const v=ru[k]-.25*elev[k];if(v>inund[k])inund[k]=v}}
+function rain(dt){for(const s of S.storms){if(s.left<=0)continue;const j0=(90-s.lat)*RZ,rj=s.r/CS,ri=Math.ceil(rj/Math.max(.2,Math.cos(s.lat*Math.PI/180))),x0=Math.floor((s.lon+180)*RZ);
+for(let y=Math.max(1,Math.floor(j0-rj));y<=Math.min(H-2,Math.ceil(j0+rj));y++){const la=90-(y+.5)/RZ;for(let a=-ri;a<=ri;a++){const x=(x0+a+W*2)%W,k=y*W+x;if(!land[k])continue;const d=Math.hypot(a*CS*cosR[y],(y+.5-j0)*CS);if(d>s.r)continue;
+const mm=s.rate*dt*(1-.6*(d/s.r)**2),cp=CAP[cls[k]],c=cp?.25+.75*Math.min(1,soil[k]/cp):1,inf=Math.min(mm*(1-c),Math.max(0,cp-soil[k]));soil[k]+=inf;wd[k]+=(mm-inf)/1000;if(mk[k]!==st){mk[k]=st;A.push(k)}}}s.left-=dt}
+S.storms=S.storms.filter(s=>s.left>0)}
+function flow(){const T=[];
+for(let n=0;n<A.length;n++){const k=A[n],w=wd[k];if(w<1e-4||k<W||k>=N-W)continue;const x=k%W,hd=elev[k]+w,ns=[k-x+(x+1)%W,k-x+(x+W-1)%W,k-W,k+W],ds=[0,0,0,0];let sum=0;
+for(let a=0;a<4;a++){const m=ns[a],d=hd-(land[m]?elev[m]+wd[m]:elev[m]);if(d>0){ds[a]=d;sum+=d}}
+if(!sum)continue;const out=Math.min(w*.6,sum/4);if(!tm[k]){tm[k]=1;T.push(k)}dw[k]-=out;for(let a=0;a<4;a++)if(ds[a]&&land[ns[a]]){const m=ns[a];if(!tm[m]){tm[m]=1;T.push(m)}dw[m]+=out*ds[a]/sum}}
+for(const t of T){tm[t]=0;const v=wd[t]+dw[t];dw[t]=0;wd[t]=v>1e-5&&land[t]&&t>=W&&t<N-W?v:0}
+const B=[];st++;for(const a of[A,T])for(const k of a){if(wd[k]<=1e-4){wd[k]=0;continue}if(mk[k]!==st){mk[k]=st;B.push(k)}}A=B;S.wet=A.length}
+const ALN=["","Advisory","Warning","Major Warning"],ALC=["","#ffd60a","#ff3d5a","#a855f7"],lvl=r=>r>=3?3:r>=1?2:r>=.5?1:0,hm=s=>{s=Math.max(0,s);return Math.floor(s/3600)+"h"+String(Math.floor(s%3600/60)).padStart(2,"0")};
+function report(){let h="",w="",bn="";const q=S.q,ts=S.tsu;
+if(q){h+=`<b>M${q.M.toFixed(1)}</b> · rupture ${Math.round(q.L)} km along the fault · felt strongly (MMI V+) ${Math.round(q.a5/1000)}k km² · damaging (VII+) ${Math.round(q.a7/1000)}k km²`+(ts?"":" · no tsunami");
+const rows=CITY.map(c=>({c,m:mmi[c.k]})).filter(r=>r.m>=4.5).sort((a,b)=>b.m-a.m).slice(0,6).map(r=>`${r.c[0]} ${RN[Math.round(r.m)]} (S ${mmss(Math.hypot(r.c.dp,q.depth)/3.9)})`);if(rows.length)h+=`<br>Shaking (MMI, S-wave arrival): ${rows.join(" · ")}`;h+=`<br>Max intensity: <b>MMI ${q.mmx>=2.5?RN[Math.max(1,Math.min(12,Math.round(q.mmx)))]:"below III"}</b>${q.mmx>=2.5?" "+pnk(q.mxk):" on land"}<br>Depth ${q.depth} km · ${q.fault} (${q.faultType})<br><span style="color:#4cc9f0">● P-wave 6.8 km/s</span> · <span style="color:#ff9f1c">● S-wave 3.9 km/s</span> · t+${mmss(q.t)}${q.t>=q.tmax?" (done)":""}`}
+if(ts){const L=CITY.filter(c=>c.lv).sort((a,b)=>a.pe-b.pe);
+for(const c of L.slice(0,10))w+=`<div style="color:${ALC[c.lv]}">● ${ALN[c.lv]} · ${c[0]} · ${c.arr!=null?`hit at ${hm(c.arr)}, gauge peak ${c.mx.toFixed(2)} m at ${hm(c.pk)} ${c.pr>0?` (forecast runup ${c.pr.toFixed(1)} m)`:""}`:`ETA ${hm(c.pe-ts.t)} · forecast runup ${c.pr.toFixed(1)} m`}</div>`;
+const nx=L.filter(c=>c.arr==null)[0];if(nx){bn=`⚠ TSUNAMI ${ALN[nx.lv].toUpperCase()} — ${nx[0]} in ${hm(nx.pe-ts.t)}`;$("bn").style.background=ALC[nx.lv];$("bn").style.color=nx.lv===1?"#000":"#fff";$("bn").className=""}
+h+=`<br>Tsunami clock ${hm(ts.t)}${ts.done?" · showing peak heights":""}`}
+if(S.th>0||S.storms.length||S.wet){let a=0,m=0;for(const k of A)if(wd[k]>.1){a+=CS*CS*cosR[(k/W)|0];if(wd[k]>m)m=wd[k]}
+const fl=CITY.filter(c=>wd[c.k]>.1).map(c=>`${c[0]} ${wd[c.k].toFixed(1)} m`);h+=(h?"<br>":"")+`Rain clock +${Math.round(S.th)} h · flooded ${Math.round(a/1000)}k km² · deepest ${m.toFixed(1)} m`+(fl.length?`<br>Flooded: ${fl.join(", ")}`:"")}
+if(!bn&&S.bgbn&&!S.nerv){bn=S.bgbn;$("bn").style.background=ALC[S.bglv||2];$("bn").style.color=S.bglv===1?"#000":"#fff";$("bn").className=""}
+if(!AL()){bn="";w=""}if(!S.nerv){$("bn").textContent=bn;$("bn").style.display=bn?"block":"none"}$("eew").innerHTML=w;$("gw").classList.toggle("hide",!ts);$("rep").innerHTML=h;if(S.hv)probeText(S.hv);else if(S.pr)probeText(S.pr)}
+function gauge(){const g=$("gc"),x=g.getContext("2d"),w=g.width,hh=g.height,c=$("gs").value==="p"?S.pr:CITY[+$("gs").value],r=c&&c.rec;x.clearRect(0,0,w,hh);x.strokeStyle="#8888";x.lineWidth=1;x.beginPath();x.moveTo(0,hh/2);x.lineTo(w,hh/2);x.stroke();if(!r||r.length<4)return;
+let tx=3600,am=.3;for(let i=0;i<r.length;i+=2){tx=Math.max(tx,r[i]);am=Math.max(am,Math.abs(r[i+1]))}
+if(c.pe){x.strokeStyle="#ffd60a";x.setLineDash([4,4]);x.beginPath();x.moveTo(c.pe/tx*w,0);x.lineTo(c.pe/tx*w,hh);x.stroke();x.setLineDash([])}
+x.strokeStyle="#ff7a1a";x.lineWidth=2;x.beginPath();for(let i=0;i<r.length;i+=2){const px=r[i]/tx*w,py=hh/2-r[i+1]/am*(hh/2-6);i?x.lineTo(px,py):x.moveTo(px,py)}x.stroke();x.fillStyle="#999";x.font="11px system-ui";x.fillText("±"+am.toFixed(1)+" m · "+hm(tx)+" · dashed = forecast ETA",4,11)}
+function mkp(nm,lon,lat){const k=idx(lon,lat),x=k%W,y=(k/W)|0;let oc=-1,bd=99;if(!land[k])oc=k;else for(let a=-14;a<=14;a++)for(let b=-14;b<=14;b++){const n=(y+a)*W+(x+b+W)%W,d=Math.hypot(a,b);if(n>=0&&n<N&&!land[n]&&d<bd){bd=d;oc=n}}return{k,oc,lon,lat,nm,rec:[]}}
+function probe(nm,lon,lat){S.pr=mkp(nm,lon,lat);$("gs").value="p";probeText(S.pr);gauge()}
+function magnet(x,y){const[lo,la]=scr2ll(x,y),k=idx(lo,la),cx=k%W,cy=(k/W)|0,rc=Math.min(16,Math.ceil(34/(sc/RZ)));let best=-1,bs=-1e9;
+for(let a=-rc;a<=rc;a++)for(let b=-rc;b<=rc;b++){const yy=cy+a;if(yy<1||yy>=H-1)continue;const dd=Math.hypot(a,b);if(dd>rc)continue;const n=yy*W+(cx+b+W)%W;if(land[n]||dO[n]!==1)continue;const v=(maxE[n]>.03?6:0)-dd;if(v>bs){bs=v;best=n}}
+return best<0?null:{lon:-180+(best%W+.5)/RZ,lat:90-(((best/W)|0)+.5)/RZ}}
+function tip(p,x,y){const t=$("tip"),ts=S.tsu,k=p.k;let s=p.nm?`<b>${p.nm}</b> `:"";
+if(ts&&!land[k]){const e=maxE[k],ru=4*e;s+=e>.05?(dO[k]===1?`coast: wave ${e.toFixed(2)} m, runup ~${ru.toFixed(1)} m`+(lvl(ru)?` <b style="color:${ALC[lvl(ru)]}">${ALN[lvl(ru)]}</b>`:""):`wave ${e.toFixed(2)} m`):"no wave here (yet)"}
+else if(ts&&land[k]&&inund[k]>.3)s+=`flooded ~${inund[k].toFixed(1)} m`;else s+=land[k]?`${Math.round(elev[k])} m elevation`:`${Math.round(-elev[k])} m deep`;
+t.innerHTML=s;t.style.display="block";t.style.left=Math.max(4,Math.min(cw-t.offsetWidth-4,x+14))+"px";t.style.top=Math.max(4,y-(S.touch?72:36))+"px"}
+function coastProfile(p){const g=$("cp"),k=!land[p.k]?p.k:p.oc;if(!S.tsu||k<0||dO[k]>3){g.style.display="none";return}const cx=k%W,cy=(k/W)|0,R=Math.round(6.5*RZ),pt=[];
+for(let a=-R;a<=R;a++)for(let b=-R;b<=R;b++){const yy=cy+a;if(yy<1||yy>=H-1||a*a+b*b>R*R)continue;const n=yy*W+(cx+b+W)%W;if(!land[n]&&dO[n]===1)pt.push([b*cosR[yy],a,maxE[n]])}
+if(pt.length<6){g.style.display="none";return}
+let mx=0,my=0;for(const q of pt){mx+=q[0];my+=q[1]}mx/=pt.length;my/=pt.length;let sxx=0,sxy=0,syy=0;for(const q of pt){const u=q[0]-mx,v=q[1]-my;sxx+=u*u;sxy+=u*v;syy+=v*v}
+const th=.5*Math.atan2(2*sxy,sxx-syy),ux=Math.cos(th),uy=Math.sin(th),NB=36;let t0=1e9,t1=-1e9;for(const q of pt){q[3]=(q[0]-mx)*ux+(q[1]-my)*uy;t0=Math.min(t0,q[3]);t1=Math.max(t1,q[3])}
+const bn=new Float32Array(NB),bi=v=>Math.max(0,Math.min(NB-1,((v-t0)/(t1-t0+1e-9)*NB)|0));for(const q of pt)bn[bi(q[3])]=Math.max(bn[bi(q[3])],q[2]);
+const ci=bi((0-mx)*ux+(0-my)*uy),x=g.getContext("2d"),w=g.width,h=g.height;x.clearRect(0,0,w,h);const top=Math.max(1,4*Math.max(...bn)),bw=w/NB;
+for(let i=0;i<NB;i++){const ru=4*bn[i],bh=Math.max(2,ru/top*(h-16));x.fillStyle=lvl(ru)?ALC[lvl(ru)]:"#8896";x.fillRect(i*bw+1,h-bh,bw-2,bh);if(i===ci){x.strokeStyle="#fff";x.lineWidth=2;x.strokeRect(i*bw+1,h-bh,bw-2,bh)}}
+x.fillStyle="#999";x.font="11px system-ui";x.fillText("Coast runup (est.) along ~"+Math.round(R*CS)+" km of shoreline · max "+top.toFixed(1)+" m · white = your cursor",4,11);g.style.display="block"}
+function hover(x,y){const[lo,la]=scr2ll(x,y);if(la<=-89.5||la>=89.5)return;const h=hit(lo,la);let lon=h[0],lat=la,nm="";
+const c=$("ct").checked&&CITY.find(c=>Math.hypot(X(c[1])-x,Y(c[2])-y)<12),v=!c&&$("vr").checked&&view.z>=1.5?VOL.find(v=>Math.hypot(X(v[1])-x,Y(v[2])-y)<10):null;
+if(c){lon=c[1];lat=c[2];nm=c[0]}else if(v){lon=v[1];lat=v[2];nm=v[0]+" volcano, "+v[3]+" m"}else if(S.tsu){const m=magnet(x,y);if(m){lon=m.lon;lat=m.lat}}
+S.hv=mkp(nm,lon,lat);info(lon,lat);probeText(S.hv);tip(S.hv,x,y);coastProfile(S.hv)}
+function probeText(p){const ts=S.tsu,k=p.k,x=k%W,y=(k/W)|0;let h=`<b>${p.nm||p.lat.toFixed(2)+"°, "+p.lon.toFixed(2)+"°"}</b> · `;
+const wv=n=>maxE[n]>.05?`wave hit at ${hm(arrT[n])}, peak <b>${maxE[n].toFixed(2)} m</b> at ${hm(pkT[n])}`:null;
+h+=land[k]?`${Math.round(elev[k])} m above sea level, ${Math.round(dL[k]*CS)} km from the sea`:`open water, ${Math.round(-elev[k])} m deep`;
+if(wd[k]>.02)h+=`<br>Flood water here: ${wd[k].toFixed(2)} m`;if(S.q){const d=hav(S.q.lat,S.q.lon,p.lat,p.lon);h+=`<br>Quake waves: P ${mmss(d/6.8)} · S ${mmss(d/3.9)}`+(land[k]?` · shaking MMI ${RN[Math.round(Math.max(1,mmi[k]))]}`:"")}if(!ts)h+="<br>No tsunami running. Click the map to place an offshore M7+ quake.";
+else if(!land[k]){const w=wv(k),ci=(y>>2)*CW+(x>>2),fe=et[ci]<1e8&&cdep[ci]>0?et[ci]:null;h+="<br>"+(w||(fe!=null?`No wave yet (forecast ETA ${hm(fe-ts.t)}) or under 0.05 m`:"No significant wave here"));if(w&&dO[k]===1){const ru=4*maxE[k];h+=`<br>Coastal runup est. <b>${ru.toFixed(1)} m</b>`+(lvl(ru)?` · <b style="color:${ALC[lvl(ru)]}">${ALN[lvl(ru)]}</b>`:"")}}
+else if(p.oc<0)h+="<br>Far inland: no tsunami exposure.";
+else{const w=wv(p.oc);h+="<br>"+(w?`Nearest sea: ${w}; est. runup ${(4*maxE[p.oc]).toFixed(1)} m${lvl(4*maxE[p.oc])?` · <b style="color:${ALC[lvl(4*maxE[p.oc])]}">${ALN[lvl(4*maxE[p.oc])]}</b>`:""}`:"Nearest sea shows no significant wave");
+h+="<br>"+(inund[k]>.3?`<b style="color:#8a5cff">Inundated: about ${inund[k].toFixed(1)} m of water</b>`:dL[k]>3?"Inland, beyond the inundation zone. Not reached.":"Not flooded at this location")}
+$("pb").innerHTML=h}
+const AL=()=>S.nerv||$("al").checked,hs=(sd,i)=>{const x=Math.sin(sd*9301+i*49297)*233280;return x-Math.floor(x)},SH=m=>m>=8?3:m>=7?2:m>=5?1:0,ro=m=>RN[Math.max(1,Math.min(12,Math.round(m)))],ST=[];let STS=new Float32Array(1),STT=new Float32Array(1);
+const DENSE=[[129,146,31,45,3],[-124,-115,32,41,4],[120,122,22,25,3],[167,178,-46,-35,4],[-73,-68,-40,-20,5],[26,44,36,42,5],[7,18,37,46,4],[20,28,35,41,4],[-105,-92,15,21,5],[95,125,-8,5,6],[119,127,6,18,5],[44,62,26,38,6],[74,90,26,34,6],[100,110,22,34,6],[-165,-140,56,66,6],[-125,-120,42,50,5],[-24,-13,63,66,4],[-72,-60,10,20,6]];
+function mkST(){let sd=12345;const rnd=()=>{sd=(sd*1664525+1013904223)>>>0;return sd/4294967296},cn={},TY=["BB","SM","MEMS","OBS"];
+const near=(lon,lat)=>{let b=1e9,n="";const cl=Math.cos(lat*Math.PI/180);for(const c of CITY){const dx=(((c[1]-lon+540)%360)-180)*cl,dy=c[2]-lat,d=dx*dx+dy*dy;if(d<b){b=d;n=c[0]}}return n};
+const add=(lon,lat,ty,nm)=>{lon=((lon+540)%360)-180;const k=idx(lon,lat),sg=[.25,.35,.8,.5][ty],la=lat*Math.PI/180,nr=nm||near(lon,lat);cn[nr]=(cn[nr]||0)+1;
+ST.push({n:`${nr} ${TY[ty]}-${cn[nr]}`,lon,lat,k,ty,dl:[.3,.5,1.5,1.2][ty]+rnd()*.4,sig:sg,nz:(rnd()+rnd()+rnd()-1.5)*1.15*sg,thr:ty===2?3:1.8,sl:Math.sin(la),cl:Math.cos(la),lo:lon*Math.PI/180})};
+for(const c of CITY){add(c[1]+.1,c[2]+.08,2,c[0]);add(c[1]-.12,c[2]-.1,0,c[0])}
+for(const f of FL){if(f.t==="r"&&!/Rift|Graben|Trough|Suez/.test(f.n))continue;const step=f.m?300:f.t==="s"?150:220;let acc=step/2;
+for(let i=1;i<f.p.length;i++){const a=f.p[i-1],b=f.p[i],cl=111.2*Math.cos((a[1]+b[1])*Math.PI/360),sl=Math.hypot((b[0]-a[0])*cl,(b[1]-a[1])*111.2);let d=acc;while(d<=sl){const u=d/sl,lo=a[0]+(b[0]-a[0])*u,la=a[1]+(b[1]-a[1])*u,k=idx(lo,la);add(lo,la,land[k]?(rnd()<.6?0:1):3);d+=step}acc=d-sl}}
+for(let j=6;j<H-6;j+=12)for(let i=0;i<W;i+=12){const jj=j+Math.round((rnd()-.5)*8),ii=i+Math.round((rnd()-.5)*8);if(land[jj*W+ii]){const r=rnd();add(-180+(ii+.5)/RZ,90-(jj+.5)/RZ,r<.5?0:r<.8?1:2)}}
+for(let j=6;j<H-6;j+=8)for(let i=0;i<W;i+=8){const k=j*W+i;if(land[k]&&fdist[k]<=16){const jj=j+Math.round((rnd()-.5)*4),ii=i+Math.round((rnd()-.5)*4);if(land[jj*W+ii]){const r=rnd();add(-180+(ii+.5)/RZ,90-(jj+.5)/RZ,r<.4?0:r<.75?1:2)}}}
+for(const[x0,x1,y0,y1,st]of DENSE)for(let la=y0;la<=y1;la+=st/RZ)for(let lo=x0;lo<=x1;lo+=st/RZ){if(land[idx(lo,la)]){const r=rnd();add(lo+(rnd()-.5)*.2,la+(rnd()-.5)*.2,r<.5?0:r<.75?1:2)}}
+STS=new Float32Array(ST.length);STT=new Float32Array(ST.length).fill(-1)}
+let AC=null;const beep=(f,d)=>{if(!$("snd").checked)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=f;g.gain.value=.06;o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d)}catch(e){}};
+const chime=()=>{[880,660,880,660].forEach((f,i)=>setTimeout(()=>beep(f,.16),i*220))},hms=t=>{t=Math.max(0,Math.round(t));return Math.floor(t/3600)+":"+String(Math.floor(t%3600/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0")};
+const AX=()=>{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC};
+function tn(t,f0,f1,d,ty,g,pc){const a=AX(),o=a.createOscillator(),v=a.createGain();o.type=ty||"sine";o.frequency.setValueAtTime(f0,t);if(f1&&f1!==f0)o.frequency.exponentialRampToValueAtTime(f1,t+d);g=g||.12;v.gain.setValueAtTime(.0001,t);v.gain.exponentialRampToValueAtTime(g,t+.01);if(!pc)v.gain.setValueAtTime(g,Math.max(t+.011,t+d-.03));v.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(v);v.connect(a.destination);o.start(t);o.stop(t+d+.02)}
+const SND=[
+["Classic two-tone chime",2.2,t=>{tn(t,880,0,.9,"sine",.16,1);tn(t+.5,660,0,1.4,"sine",.16,1)}],
+["Rising triple tone",1.2,t=>[523,659,784].forEach((f,i)=>tn(t+i*.28,f,0,.3,"triangle",.14))],
+["Dissonant double chime",1.6,t=>{[0,.22,.6,.82].forEach((o,i)=>{(i<2?[880,932]:[740,784]).forEach(f=>tn(t+o,f,0,.2,"sine",.1))})}],
+["Rising-falling siren",3.6,t=>{for(let i=0;i<3;i++){tn(t+i*1.2,600,1200,.6,"sawtooth",.08);tn(t+i*1.2+.6,1200,600,.6,"sawtooth",.08)}}],
+["Air-raid wail",3.4,t=>{tn(t,300,700,1.7,"sawtooth",.09);tn(t+1.7,700,300,1.7,"sawtooth",.09)}],
+["Emergency beeps",1.2,t=>{for(let i=0;i<4;i++)tn(t+i*.28,1000,0,.16,"square",.06)}],
+["Klaxon",1.8,t=>{for(let i=0;i<5;i++)tn(t+i*.34,i%2?165:220,0,.3,"sawtooth",.1)}],
+["Phone alert tri-tone",1.2,t=>{[1175,988,1319].forEach((f,i)=>tn(t+i*.18,f,0,.2,"sine",.14))}],
+["Pager chirps",1.4,t=>{for(let i=0;i<8;i++)tn(t+i*.14+(i>3?.2:0),2000,0,.07,"square",.05)}],
+["Ship horn",2.2,t=>{tn(t,110,0,2,"sawtooth",.1);tn(t,165,0,2,"sawtooth",.07)}],
+["Fire alarm bell",1.6,t=>{for(let i=0;i<16;i++)tn(t+i*.09,1050,0,.07,"square",.05)}],
+["Sonar ping",3,t=>{tn(t,1200,0,1.4,"sine",.2,1);tn(t+1.5,1200,0,1.4,"sine",.2,1)}],
+["Ah-ooga horn",1.4,t=>{tn(t,300,500,.5,"sawtooth",.1);tn(t+.55,500,250,.7,"sawtooth",.1)}],
+["Retro arcade alert",1.6,t=>{for(let r=0;r<3;r++)[523,659,784,1047].forEach((f,i)=>tn(t+r*.5+i*.1,f,0,.09,"square",.05))}],
+["Sci-fi red alert",2.2,t=>{for(let i=0;i<3;i++)tn(t+i*.72,1200,300,.65,"sawtooth",.08)}],
+["Heartbeat",3.6,t=>{for(let i=0;i<4;i++){tn(t+i*.9,70,40,.2,"sine",.5,1);tn(t+i*.9+.24,60,35,.2,"sine",.4,1)}}],
+["Whale song",3.8,t=>{tn(t,200,600,1.2,"sine",.15);tn(t+1.2,600,300,1.5,"sine",.15);tn(t+2.7,300,900,1,"sine",.12)}],
+["Glass harmonica",2.6,t=>{[1318,1568,1976,2349].forEach((f,i)=>tn(t+i*.08,f,0,2.2,"sine",.05,1))}],
+["Dial-up modem",1.4,t=>{for(let i=0;i<14;i++)tn(t+i*.09,900+(i*1237)%1500,0,.08,"square",.04)}],
+["Cuckoo clock",1.6,t=>{for(let r=0;r<2;r++){tn(t+r*.8,784,0,.25,"sine",.18);tn(t+r*.8+.3,622,0,.4,"sine",.18)}}],
+["Old telephone ring",2.8,t=>{for(let b=0;b<2;b++)for(let i=0;i<12;i++){tn(t+b*1.4+i*.05,440,0,.045,"sine",.07);tn(t+b*1.4+i*.05,480,0,.045,"sine",.07)}}],
+["Church bell",3.2,t=>{[[220,.2],[550,.12],[660,.1],[880,.08],[1100,.05]].forEach(([f,g])=>tn(t,f,0,3,"sine",g,1))}],
+["Morse SOS",3.4,t=>{let x=t;for(const d of[.1,.1,.1,.3,.3,.3,.1,.1,.1]){tn(x,700,0,d,"sine",.1);x+=d+.1}}],
+["Theremin warble",2.2,t=>{const a=AX(),o=a.createOscillator(),l=a.createOscillator(),lg=a.createGain(),v=a.createGain();o.frequency.value=660;l.frequency.value=6;lg.gain.value=45;l.connect(lg);lg.connect(o.frequency);v.gain.setValueAtTime(.0001,t);v.gain.exponentialRampToValueAtTime(.12,t+.2);v.gain.setValueAtTime(.12,t+1.9);v.gain.exponentialRampToValueAtTime(.0001,t+2.1);o.connect(v);v.connect(a.destination);o.start(t);l.start(t);o.stop(t+2.2);l.stop(t+2.2)}],
+["Bass wobble",2.4,t=>{const a=AX(),o=a.createOscillator(),fl=a.createBiquadFilter(),l=a.createOscillator(),lg=a.createGain(),v=a.createGain();o.type="sawtooth";o.frequency.value=55;fl.type="lowpass";fl.frequency.value=500;l.frequency.value=3;lg.gain.value=400;l.connect(lg);lg.connect(fl.frequency);v.gain.setValueAtTime(.18,t);v.gain.setValueAtTime(.18,t+2.1);v.gain.exponentialRampToValueAtTime(.0001,t+2.3);o.connect(fl);fl.connect(v);v.connect(a.destination);o.start(t);l.start(t);o.stop(t+2.4);l.stop(t+2.4)}],
+["Duck quacks",1.4,t=>{for(let i=0;i<3;i++)tn(t+i*.3,520,190,.2,"sawtooth",.14,1)}],
+["Doorbell",1.6,t=>{tn(t,660,0,.6,"sine",.16,1);tn(t+.5,523,0,1.1,"sine",.16,1)}],
+["Wind chimes",3,t=>{[1568,1319,1760,1047,1397,2093].forEach((f,i)=>tn(t+i*.3+(i%2)*.07,f,0,1.6,"sine",.07,1))}],
+["Kitchen timer",2,t=>{for(let b=0;b<3;b++)for(let i=0;i<6;i++)tn(t+b*.6+i*.045,2300,0,.03,"square",.05)}],
+["Descending alarm",1.8,t=>{[988,784,659,523].forEach((f,i)=>tn(t+i*.4,f,0,.38,"sawtooth",.09))}],
+["WEA attention signal",3.2,t=>{for(let i=0;i<3;i++){tn(t+i*1.05,853,0,.9,"square",.09);tn(t+i*1.05,960,0,.9,"square",.09)}}],
+["Urgent warble",2.1,t=>{for(let i=0;i<14;i++)tn(t+i*.14,i%2?1480:740,0,.13,"square",.08)}],
+["Tsunami siren",3.7,t=>{for(let i=0;i<2;i++){tn(t+i*1.85,400,900,.92,"sawtooth",.12);tn(t+i*1.85,402,904,.92,"square",.04);tn(t+i*1.85+.92,900,400,.92,"sawtooth",.12);tn(t+i*1.85+.92,904,402,.92,"square",.04)}}],
+["Extreme alert (WEA + siren)",4,t=>{for(let i=0;i<4;i++){tn(t+i*.62,853,0,.5,"square",.1);tn(t+i*.62,960,0,.5,"square",.1)}tn(t+2.55,500,1000,.7,"sawtooth",.12);tn(t+3.25,1000,500,.7,"sawtooth",.12)}]];
+function playSel(rep,force,vv){if(!force&&!$("snd").checked)return;try{const v=vv??$("ws").value,i=v==="r"?Math.floor(Math.random()*SND.length):+v,t=AX().currentTime+.05;for(let k=0;k<rep;k++)SND[i][2](t+k*(SND[i][1]+.3))}catch(e){}}
+function say(txt,pri){if(!$("tts").checked||!window.speechSynthesis)return;try{if(pri&&(speechSynthesis.speaking||speechSynthesis.pending))return;const u=new SpeechSynthesisUtterance(txt),v=(speechSynthesis.getVoices()||[]).find(v=>/^en/i.test(v.lang));if(v)u.voice=v;u.rate=1.05;speechSynthesis.speak(u)}catch(e){}}
+function sayList(intro,names,outro){say(intro);for(let i=0;i<names.length;i+=6)say(names.slice(i,i+6).join(", ")+".");if(outro)say(outro)}
+function majorSay(rows){const q=S.q,n=rows.filter(c=>q.t<Math.hypot(c.dp,q.depth)/3.9&&Math.round(c.fm)>=5).sort((a,b)=>a.se-b.se).map(c=>c[0]);sayList("Major earthquake early warning. A very large earthquake has been detected. Strong shaking is expected in the following areas.",n.length?n:["no listed cities"],"Take cover now. Drop, cover, and hold on.")}
+function warn(q,rows,nx){q.chimed=1;if(performance.now()-q.rt0>40000)return;const major=q.Me>=7.8;q.major=major?1:0;if(major||nx||q.M>=7||rows.some(c=>c.fm>=5))playSc(major?"major":"main",major?2:1);
+if(major)majorSay(rows);else if(nx){const r=Math.max(1,Math.round(nx.se-q.t));say(`Earthquake early warning. An earthquake has been detected. Strong shaking is expected ${nx.home?"at your home":"in "+nx[0]} in ${r>90?Math.round(r/60)+" minutes":r+" seconds"}. Take cover now.`,1)}else say("Earthquake early warning. An earthquake has been detected. No strong shaking is expected.",1)}
+function upgrade(q,rows){q.major=1;playSc("major",2);majorSay(rows)}
+function tsuAlert(){const q=S.q,ts=S.tsu;if(q.t-(q.ti+90)>600)return;const g=l=>CITY.filter(c=>c.fl===l).sort((a,b)=>a.fpe-b.fpe).map(c=>c[0]),a=[g(3),g(2),g(1)];if(!a[0].length&&!a[1].length&&!a[2].length)return;playSc(a[0].length?"tmaj":"tsu",1);
+say("Tsunami information. A tsunami is expected.");if(a[0].length)sayList("Major tsunami warning for",a[0]);if(a[1].length)sayList("Tsunami warning for",a[1]);if(a[2].length)sayList("Tsunami advisory for",a[2]);say("Move to high ground immediately.")}
+const MLUS=MLUT.map(c=>`rgb(${c[0]|0},${c[1]|0},${c[2]|0})`),BGC={fore:"#3dd6c6",after:"#7aa2ff",rand:"#3dd6c6",doub:"#3dd6c6"},TAG={fore:"Earthquake",after:"Aftershock",rand:"Earthquake",doub:"Earthquake"},BG=[],FW=[],EVLOG=[];let evId=0,lastSnd=0,lastTts=0;
+function drawEEW(){const q=S.q,far=view.z<2.2;
+for(let i=0;i<(LIVEON()?0:ST.length);i++){const s=ST[i],x=X(s.lon),y=Y(s.lat);if(x<-8||x>cw+8||y<-8||y>ch+8)continue;const mi=STS[i],tt=STT[i];let col="#6f8398",z=2.6;
+if(mi>=3.5){col=MLUS[Math.min(80,(mi-3.5)*10|0)];z=3+Math.min(5,(mi-3)*.8)}else if(tt>=0&&tt<25){col="#ffb020";z=3.2}
+ctx.fillStyle=col;if(far&&z<4){ctx.fillRect(x-1.2,y-1.2,2.4,2.4);continue}
+ctx.beginPath();if(s.ty===1)ctx.arc(x,y,z,0,7);else if(s.ty===2)ctx.rect(x-z*.8,y-z*.8,z*1.6,z*1.6);else if(s.ty===3){ctx.moveTo(x,y-z);ctx.lineTo(x+z,y);ctx.lineTo(x,y+z);ctx.lineTo(x-z,y)}else{ctx.moveTo(x,y-z);ctx.lineTo(x-z*.9,y+z*.7);ctx.lineTo(x+z*.9,y+z*.7)}ctx.closePath();ctx.fill();
+if(tt>=0&&tt<3.5){ctx.strokeStyle="#ffb020";ctx.lineWidth=1.4;ctx.globalAlpha=1-tt/3.5;ctx.beginPath();ctx.arc(x,y,4+tt*5,0,7);ctx.stroke();ctx.globalAlpha=1}}
+for(const e of BG){if(!e.est||((S.focus||"all")!=="all"&&e.id!==S.focus))continue;const t=S.now-e.t0;if(t<e.ti||t>e.life)continue;const x=X(e.est.lon),y=Y(e.est.lat);if(x<-30||x>cw+30||y<-30||y>ch+30)continue;const r=Math.max(3,Math.min(22,4+(e.Me-3.5)*2.6)),col=BGC[e.kind];ctx.strokeStyle=col;ctx.fillStyle=col+"44";ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();ctx.stroke();const a=t-e.ti;if(a<6){ctx.globalAlpha=1-a/6;ctx.beginPath();ctx.arc(x,y,r+a*6,0,7);ctx.stroke();ctx.globalAlpha=1}
+if(view.z>=2.5||e.Me>=6){ctx.fillStyle="#fff";ctx.fillText("M"+e.Me.toFixed(1)+" · "+Math.round(e.dep)+" km",x+r+3,y+3)}}
+if(q&&q.est&&(S.focus==="all"||S.focus==="q"||!S.focus)){const e=q.est,x=X(e.lon),y=Y(e.lat);ctx.strokeStyle="#ff5a4d";ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,Math.max(6,e.r/111*sc),0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(x-8,y);ctx.lineTo(x+8,y);ctx.moveTo(x,y-8);ctx.lineTo(x,y+8);ctx.stroke()}}
+const VP={major:[500,150,500,150,500,150,900],tmaj:[500,150,500,150,500,150,900],main:[350,120,350,120,350],tsu:[600,200,600],after:[200,100,200],arrive:[250,100,250]};
+function vibe(sc){try{if($("vb")&&$("vb").checked&&navigator.vibrate&&VP[sc])navigator.vibrate(VP[sc])}catch(e){}}
+async function notify(title,body,tag,major){try{if(!$("nt")||!$("nt").checked||!window.Notification||Notification.permission!=="granted"||document.visibilityState==="visible")return;const o={body,tag,renotify:true,requireInteraction:!!major,icon:"icon-192.png",badge:"icon-192.png",vibrate:major?VP.major:VP.main,data:{}};
+const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg)reg.showNotification(title,o);else new Notification(title,o)}catch(e){}}
+const playSc=(sc,rep)=>{let v=$("sc_"+sc).value;if(v==="d")v=$("ws").value;playSel(rep||1,false,v);vibe(sc)},pois=(mu,cap)=>{if(mu<=0)return 0;if(mu>12)return cap;let L=Math.exp(-mu),k=0,p=1;do{k++;p*=Math.random()}while(p>L&&k<cap);return k-1},gauss=()=>Math.random()+Math.random()+Math.random()-1.5;
+function initFW(){for(const f of FL){let L=0;for(let i=1;i<f.p.length;i++){const a=f.p[i-1],b=f.p[i];L+=Math.hypot((b[0]-a[0])*Math.cos((a[1]+b[1])*Math.PI/360),b[1]-a[1])*111.2}FW.push({f,L,w:L*(f.m?.5:1)*(f.t==="s"?2.5:f.t==="t"?1.5:f.t==="r"?.7:1)})}}
+const epiCell=(lon,lat)=>{let k=idx(lon,lat);if($("snap").checked&&fdist[k]<=4*RZ&&fid[k]>=0)k=fid[k];return k},sched=(d,fn)=>{(S.sq=S.sq||[]).push({at:S.now+d,fn})};
+function placeName(lat,lon){let b=1e9,n="";for(const c of CITY){const d=hav(lat,lon,c[2],c[1]);if(d<b){b=d;n=c[0]}}return(land[idx(lon,lat)]?"near ":"off ")+n}
+function newEvent(o){const M=o.M,dep=o.dep||15,L=rupLen(M),la=o.lat*Math.PI/180,lo=o.lon*Math.PI/180,sl=Math.sin(la),cl=Math.cos(la),cand=[];
+for(let i=0;i<ST.length;i++){const s=ST[i],d=Math.acos(Math.min(1,sl*s.sl+cl*s.cl*Math.cos(lo-s.lo)))*6371,rr=Math.hypot(d,dep),v=estimateMMI(M,Math.hypot(Math.max(0,d-L/2),dep),land[s.k]?amp[s.k]:0)+s.nz;if(v>=s.thr)cand.push([rr/6.8+s.dl,i,rr/3.9,v])}
+cand.sort((a,b)=>a[0]-b[0]);const e={id:++evId,kind:o.kind,M,dep,lon:o.lon,lat:o.lat,t0:S.now,rt0:performance.now(),seed:Math.random()*1000,cand,ti:o.live?0:cand.length>=3?cand[2][0]+3:1e9,life:Math.min(900,240+120*Math.max(0,M-5)),warned:0,Me:M-1.2,cd:Float32Array.from(CITY,c=>hav(o.lat,o.lon,c[2],c[1]))};
+e.life0=e.life;e.pts=M>=5.5?rupt(idx(o.lon,o.lat),L):null;EVLOG.push({id:e.id,kind:e.kind,M,lat:o.lat,lon:o.lon,t0:S.now,e});if(EVLOG.length>80)EVLOG.shift();
+e.ft=o.ft;bgTsu(e);if(o.live){e.live=1;e.pl=o.live.place;e.cand=[];e.Me=M;e.est={lat:o.lat,lon:o.lon,r:3};e.usgs={p:o.live.p,dep:o.dep}}
+{const L2=rupLen(M);let cm=0,cc="";CITY.forEach((c,ci)=>{const m=estimateMMI(M,Math.hypot(Math.max(0,e.cd[ci]-L2/2),dep),land[c.k]?amp[c.k]:0);if(m>cm){cm=m;cc=c[0]}});e.cm=cm;e.cc=cc;
+e.sig=M>=7||!!e.bt||cm>=7;e.why=M>=7?"M7+":e.bt?"tsunami":cm>=7?"MMI "+ro(cm)+" "+cc:"";
+e.life=e.bt?7200:e.sig?1800:Math.min(e.life,(e.ti<1e8?e.ti:30)+45);if(o.live){e.life=Math.max(e.life,1800);if(o.live.age>300)e.warned=1}e.life0=e.life}
+if(e.kind==="rand"&&!o.live&&$("ash").checked&&e.M>=5.8)startBAS(e);
+BG.push(e);while(BG.length>150){const i=BG.findIndex(x=>!x.pin);BG.splice(i<0?0:i,1)}return e}
+function maybeDoublet(e){if($("db").checked&&e.M>=5.8&&Math.random()<.3)sched(20+Math.random()*580,()=>newEvent({kind:"doub",M:e.M+(Math.random()-.5)*.6,lon:e.lon+gauss()*.4,lat:e.lat+gauss()*.3,dep:e.dep}))}
+function randDep(t){const r=Math.random();let d;if(t==="s")d=r<.12?70+Math.random()*230:r<.4?8+Math.random()*17:15+Math.random()*45;else d=r<.06?20+Math.random()*20:2+Math.random()*16;return Math.round(d)}
+let URB=null;
+function urbanQuake(){if(!URB)URB=CITY.filter(c=>land[c.k]&&fdist[c.k]<=3*RZ);if(!URB.length)return;const c=URB[Math.floor(Math.random()*URB.length)],M=5-Math.log10(1-Math.random()*(1-Math.pow(10,-1.6))),d=3+Math.random()*30,a=Math.random()*6.283,dep=Math.round(2+Math.random()*12),la=c[2]+d*Math.cos(a)/111.2,lo=c[1]+d*Math.sin(a)/(111.2*Math.cos(c[2]*Math.PI/180));launchRand({kind:"rand",M,lon:((lo+540)%360)-180,lat:la,dep,ft:"c"},1)}
+// A random quake may be preceded by foreshocks (the quake is then delayed 1-10 min) and, if large enough, starts its own aftershock sequence.
+function launchRand(o,urban){const go=()=>{const e=newEvent(o);if(urban)e.urban=1;maybeDoublet(e);return e};
+if($("fsh").checked&&o.M>=6&&Math.random()<.18){const D=60+Math.random()*540,n=1+Math.floor(Math.random()*2);for(let i=0;i<n;i++){const dl=D*Math.sqrt(Math.random())*.97,Mf=Math.min(o.M-1.2,Math.max(3.8,o.M-1.5-2.2*Math.random()));sched(dl,()=>newEvent({kind:"fore",M:Mf,lon:o.lon+gauss()*.15,lat:o.lat+gauss()*.1,dep:o.dep,ft:o.ft}))}sched(D,go)}else go()}
+function startBAS(e){(S.bas=S.bas||[]).push({t0:S.now,M:e.M,L:rupLen(e.M),pts:e.pts&&e.pts.length?e.pts:[[e.lon,e.lat]],dep:e.dep,K:Math.pow(10,e.M-5.4)/100,id:e.id});while(S.bas.length>8)S.bas.shift()}
+function randQuake(){if($("uq").checked&&Math.random()<.14){urbanQuake();return}const sv=+$("rqs").value,Mn=3+2*sv,Mx=4.5+3.5*sv,M=Mn-Math.log10(1-Math.random()*(1-Math.pow(10,-(Mx-Mn))));let tot=0;for(const w of FW)tot+=w.w;let x=Math.random()*tot,F=FW[0];for(const w of FW){x-=w.w;if(x<=0){F=w;break}}
+let d=Math.random()*F.L,pt=F.f.p[0];for(let i=1;i<F.f.p.length;i++){const a=F.f.p[i-1],b=F.f.p[i],sl=Math.hypot((b[0]-a[0])*Math.cos((a[1]+b[1])*Math.PI/360),b[1]-a[1])*111.2;if(d<=sl){const u=d/sl;pt=[a[0]+(b[0]-a[0])*u,a[1]+(b[1]-a[1])*u];break}d-=sl}
+launchRand({kind:"rand",M,lon:((pt[0]+gauss()*.1+540)%360)-180,lat:pt[1]+gauss()*.1,dep:randDep(F.f.t),ft:F.f.t})}
+function aftershock(a){a=a||S.as;const Mx=a.M-1.2,Mn=4.2;if(Mx<=Mn)return;const M=Mn-Math.log10(1-Math.random()*(1-Math.pow(10,-(Mx-Mn)))),p=a.pts[Math.floor(Math.random()*a.pts.length)],sp=a.L>100?25:10,lat=p[1]+gauss()*sp/111.2,lon=p[0]+gauss()*sp/(111.2*Math.cos(p[1]*Math.PI/180));if($("as6").checked&&M<6)return;maybeDoublet(newEvent({kind:"after",M,lon:((lon+540)%360)-180,lat,dep:a.dep?Math.max(2,Math.round(a.dep+gauss()*5)):5+Math.random()*25}))}
+function startSeq(lon,lat){if($("lv").checked){$("hint").textContent="Live mode: simulated quakes are disabled so real and fake events never mix. Turn off Live tracking to use the sandbox.";return}if(!$("fsh").checked){startQuake(lon,lat);return}
+const k=epiCell(lon,lat),M=+$("mag").value,el=-180+(k%W+.5)/RZ,ea=90-(((k/W)|0)+.5)/RZ,D=90,n=1+Math.floor(Math.random()*2);S.pend={lon,lat,at:S.now+D};
+for(let i=0;i<n;i++){const dl=D*Math.sqrt(Math.random())*.97,Mf=Math.min(M-1.2,Math.max(3.6,M-1.5-2.2*Math.random()));sched(dl,()=>newEvent({kind:"fore",M:Mf,lon:el+gauss()*.15,lat:ea+gauss()*.1,dep:10+Math.random()*10}))}
+S.run=true;$("pp").textContent="Pause";$("hint").textContent="Earthquake activity detected nearby."}
+function bgStep(sd){S.now=(S.now||0)+sd;if(S.pend&&S.now>=S.pend.at){const p=S.pend;S.pend=null;startQuake(p.lon,p.lat)}
+if(S.sq)for(let i=S.sq.length-1;i>=0;i--)if(S.now>=S.sq[i].at)S.sq.splice(i,1)[0].fn();
+if($("rq").checked&&!$("lv").checked){const f=+$("rqf").value;for(let n=pois(.3*f*f*sd,6);n>0;n--)randQuake()}
+if(S.bas)for(let i=S.bas.length-1;i>=0;i--){const a=S.bas[i],tau=S.now-a.t0;if(tau>172800){S.bas.splice(i,1);continue}if($("ash").checked)for(let n=pois(a.K/(tau+600)*sd,4);n>0;n--)aftershock(a)}
+if(S.as){const tau=S.now-S.as.t0;for(let n=pois(S.as.K/(tau+600)*sd,4);n>0;n--)aftershock()}
+if(S.fr%30===0)for(let i=BG.length-1;i>=0;i--)if(S.now-BG[i].t0>BG[i].life)BG.splice(i,1)}
+function bgNames(e){const t=S.now-e.t0,L=rupLen(e.Me),r=[];CITY.forEach((c,ci)=>{if(t>=e.cd[ci]/3.9)return;const de=hav(e.est.lat,e.est.lon,c[2],c[1]),fm=estimateMMI(e.Me,Math.hypot(Math.max(0,de-L/2),e.dep),land[c.k]?amp[c.k]:0);if(Math.round(fm)>=5)r.push([c[0],de])});return r.sort((a,b)=>a[1]-b[1]).map(x=>x[0])}
+// ---- Live USGS tracking: real quakes from the public GeoJSON feed become events (alerts and tsunami forecasts are simulations)
+const LIVEON=()=>{const l=document.getElementById("lv");return !!(l&&l.checked)},esc=x=>String(x==null?"":x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])),safeUrl=u=>typeof u==="string"&&/^https:\/\/earthquake\.usgs\.gov\//.test(u)?u:"";
+function usgsHTML(e,compact){const u=e.usgs;if(!u)return"";const p=u.p,url=safeUrl(p.url),T=new Date(p.time),ag=Math.max(0,(Date.now()-p.time)/1000);
+const row=(a,b)=>b==null||b===""?"":`<div class="nr"><span>${a}</span><span>${b}</span></div>`;
+const link=url?`<a href="${esc(url)}" target="_blank" rel="noopener" style="color:#7dd3fc">View on USGS ↗</a>`:"";
+if(compact)return` · USGS: ${esc(p.magType||"M")} ${p.mag}${p.status?" · "+esc(p.status):""}${p.felt?" · felt by "+p.felt:""}${p.alert?" · PAGER "+esc(p.alert):""}${p.tsunami?" · tsunami flag":""} ${link}`;
+return`<div class="nvh" style="margin-top:8px"><span>USGS data (real earthquake)</span><span>${link}</span></div>`+row("Event",esc(p.title||p.place))+row("Magnitude",`${p.mag} ${esc(p.magType||"")}`)+row("Origin time",`${T.toUTCString().slice(5,25)} UTC · ${T.toLocaleString()} local · ${hms(ag)} ago`)+row("Location",`${Number(e.lat).toFixed(3)}°, ${Number(e.lon).toFixed(3)}°`)+row("Depth",u.dep!=null?u.dep.toFixed(1)+" km":"")+row("Status",p.status==="reviewed"?"reviewed by USGS":esc(p.status||"unknown")+" (unverified)")+row("USGS significance",p.sig)+row("Tsunami flag",p.tsunami?"yes (see tsunami.gov)":"no")+row("Felt reports (DYFI)",p.felt?p.felt+(p.cdi?" · max intensity "+p.cdi:""):"")+row("ShakeMap max MMI",p.mmi)+row("PAGER alert",esc(p.alert))+row("Stations used",p.nst)+row("Azimuthal gap",p.gap!=null?p.gap+"°":"")+row("RMS",p.rms)+row("Network / code",esc((p.net||"")+" "+(p.code||"")))+row("Last updated",p.updated?new Date(p.updated).toLocaleTimeString():"")}
+const LIVE={seen:new Map(),timer:null,n:0,list:[]};
+async function liveFetch(){const st=$("lvs");try{const r=await fetch(`https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/${$("lvm").value}_hour.geojson`,{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);const j=await r.json(),now=Date.now();let add=0;
+for(const f of j.features.slice().sort((a,b)=>a.properties.time-b.properties.time)){const p=f.properties,[lon,lat,dep]=f.geometry.coordinates;if(LIVE.seen.has(f.id)){const o=LIVE.seen.get(f.id);if(o&&o.usgs)o.usgs.p=p;continue}if($("lvh").checked&&p.status!=="reviewed")continue;if(p.mag==null||p.mag<2||!isFinite(lon)||!isFinite(lat))continue;
+const age=Math.max(0,(now-p.time)/1000),k=idx(lon,lat),ev=newEvent({kind:"rand",M:p.mag,lon,lat,dep:Math.max(1,dep||10),ft:elev[k]<-30?"s":"c",live:{id:f.id,place:String(p.place||"").replace(/[<>&"'`]/g,""),age,p}});LIVE.seen.set(f.id,ev);add++;LIVE.n++}
+LIVE.list=j.features.map(f=>({id:f.id,p:f.properties})).sort((a,b)=>b.p.time-a.p.time);liveList();
+st.textContent=`Live: connected · ${j.features.length} in the last hour · ${LIVE.n} shown · updated ${new Date().toLocaleTimeString()}`;S.dirty=true}
+catch(e){st.textContent="Live: couldn't reach USGS ("+(e.message||e)+"). Will retry."}}
+function modeBadge(){const on=$("lv").checked,b=$("modeb");b.textContent=on?"LIVE · USGS DATA":"SIMULATION";b.style.background=on?"#34c759":"#ffb020";["rq","uq","fsh","ash","as6","db"].forEach(i=>{if($(i))$(i).disabled=on});if(on)$("rq").checked=false}
+function liveList(){const d=$("lvl");if(!d)return;d.innerHTML=LIVE.list.slice(0,40).map(({p})=>{const u=safeUrl(p.url),a=Math.max(0,(Date.now()-p.time)/1000);return`<div class="nr"><span>M${p.mag==null?"?":p.mag} · ${esc(p.place)}</span><span>${hms(a)} ago${u?` · <a href="${esc(u)}" target="_blank" rel="noopener" style="color:#7dd3fc">USGS ↗</a>`:""}</span></div>`}).join("")}
+function liveToggle(){clearInterval(LIVE.timer);LIVE.timer=null;LIVE.seen.clear();LIVE.n=0;LIVE.list=[];$("rs").onclick();modeBadge();if($("lv").checked){$("spd").value=0;$("spd").oninput();S.run=true;$("pp").textContent="Pause";$("lvs").textContent="Live: connecting…";liveFetch();LIVE.timer=setInterval(liveFetch,20000)}else{$("lvl").innerHTML="";$("lvs").textContent="Off. Sandbox mode: everything on the map is simulated."}}
+// ---- Home location: alerts that matter to you
+function HC(){const h=S.home;if(!h)return null;const a=["Home",h.lon,h.lat];a.k=h.k;a.home=1;return a}
+function setHome(lon,lat,name){lon=((lon+540)%360)-180;S.home={lon,lat,name,k:idx(lon,lat)};try{localStorage.setItem("ehl_home",JSON.stringify({lon,lat,name}))}catch(e){}
+$("hinfo").textContent="Home: "+name+` (${lat.toFixed(1)}°, ${lon.toFixed(1)}°). Alerts and sounds now consider shaking here.`;S.dirty=true}
+function clearHome(){S.home=null;try{localStorage.removeItem("ehl_home")}catch(e){}$("hc").value="";$("hinfo").textContent="No home set. Alerts then use only how significant the quake is.";S.dirty=true}
+function initHome(){const sel=$("hc");sel.innerHTML='<option value="">— none —</option>'+CITY.map((c,i)=>[c[0],i]).sort((a,b)=>a[0]<b[0]?-1:1).map(([n,i])=>`<option value="${i}">${n}</option>`).join("");
+sel.onchange=()=>{if(sel.value==="")return clearHome();const c=CITY[+sel.value];setHome(c[1],c[2],c[0])};
+$("hmap").onclick=()=>{S.setHome=1;$("hint").textContent="Tap the map to set your home location."};$("hclr").onclick=clearHome;
+$("nt").onchange=async()=>{const st=$("nts");if(!$("nt").checked)return;if(!window.Notification){st.textContent="This browser doesn't support notifications (iPhone: add to Home Screen first).";$("nt").checked=false;return}
+if(Notification.permission==="default")await Notification.requestPermission();if(Notification.permission!=="granted"){st.textContent="Notifications are blocked. Allow them in your browser's site settings.";$("nt").checked=false}else st.textContent="Notifications on. They appear when the app is in the background."};
+$("vb").onchange=()=>{if($("vb").checked){if(!navigator.vibrate)$("nts").textContent="This device/browser doesn't support vibration (iPhones don't).";else navigator.vibrate(120)}};
+$("ntest").onclick=()=>{const was=$("nt").checked;vibe("main");if(was&&Notification.permission==="granted"){$("nts").textContent="Test: switch to another app within 5 seconds to see the notification.";setTimeout(()=>notify("Test alert","This is how a live quake alert looks.","test",false),5000)}else $("nts").textContent="Test vibration sent. Turn on Notifications to test those."};$("lv").onchange=liveToggle;$("lvh").onchange=()=>{if($("lvh").checked){for(let i=BG.length-1;i>=0;i--){const e=BG[i];if(e.live&&e.usgs&&e.usgs.p.status!=="reviewed"){for(const[id,v]of LIVE.seen)if(v===e)LIVE.seen.delete(id);BG.splice(i,1)}}S.dirty=true}if($("lv").checked)liveFetch()};$("lvm").onchange=()=>{LIVE.seen.clear();if($("lv").checked)liveFetch()};
+try{const h=JSON.parse(localStorage.getItem("ehl_home")||"null");if(h&&isFinite(h.lon)&&isFinite(h.lat)){setHome(h.lon,h.lat,h.name||"Home");const i=CITY.findIndex(c=>c[0]===h.name);if(i>=0)sel.value=String(i)}}catch(e){}}
+function drawHome(){const h=S.home,x=X(h.lon),y=Y(h.lat);if(x<-30||x>cw+30||y<-30||y>ch+30)return;ctx.save();ctx.lineWidth=2.5;ctx.strokeStyle="#000";ctx.fillStyle="#ffd60a";ctx.beginPath();ctx.moveTo(x-9,y-1);ctx.lineTo(x,y-10);ctx.lineTo(x+9,y-1);ctx.lineTo(x+6,y-1);ctx.lineTo(x+6,y+7);ctx.lineTo(x-6,y+7);ctx.lineTo(x-6,y-1);ctx.closePath();ctx.stroke();ctx.fill();ctx.font="bold 11px system-ui";ctx.strokeText("Home",x+12,y+4);ctx.fillStyle="#fff";ctx.fillText("Home",x+12,y+4);ctx.restore()}
+function announceBG(e){const me=e.Me;if(me<4.8)return;if((S.focus||"all")!=="all"&&e.id!==S.focus)return;const nr=performance.now(),big=me>=7.8,sc=big?"major":e.kind==="after"?"after":"main";
+let hf=0;if(S.home&&e.est){const de=hav(e.est.lat,e.est.lon,S.home.lat,S.home.lon);hf=estimateMMI(me,Math.hypot(Math.max(0,de-rupLen(me)/2),e.dep),land[S.home.k]?amp[S.home.k]:0)}
+const homeHit=Math.round(hf)>=5,wea=big||e.sig||homeHit;
+if(nr-lastSnd>2500&&wea&&(e.kind!=="after"||me>=5.2)){playSc(sc,big?2:1);lastSnd=nr}
+if(e.live&&wea&&e.usgs){const p=e.usgs.p;notify(`${big?"MAJOR ":""}M${me.toFixed(1)} earthquake${p.status!=="reviewed"?" (unverified)":""} · ${e.pl||"live"}`,`${Math.round(e.dep)} km deep`+(homeHit?` · shaking expected at your home (MMI ${ro(hf)})`:e.why?" · "+e.why:"")+" · live USGS data, simulated alert","q"+e.id,big||homeHit)}
+if(me<5||(!big&&nr-lastTts<6000)||(!big&&window.speechSynthesis&&speechSynthesis.speaking))return;lastTts=nr;e.pl=e.pl||placeName(e.est.lat,e.est.lon);const names=bgNames(e).slice(0,6);
+if(big){sayList(`Major earthquake early warning. A very large earthquake has been detected ${e.pl}. Strong shaking is expected in the following areas.`,bgNames(e).length?bgNames(e):["no listed cities"],"Take cover now. Drop, cover, and hold on.");if(homeHit)say(`Strong shaking is expected at your home, intensity ${ro(hf)}.`);return}
+const m=me.toFixed(1);if(homeHit)setTimeout(()=>say(`Shaking is expected at your home, intensity ${ro(hf)}.`),0);say(e.kind==="after"?`Aftershock detected ${e.pl}. Magnitude ${m} estimated.`:`Earthquake detected ${e.pl}. Magnitude ${m} estimated.`+(names.length?` Strong shaking is expected in ${names.join(", ")}.`:""))}
+function bgNerv(F){F=F||"all";const o={ls:"",alarm:false,big:"",sub:"",bn:"",st:"",n:0};let best=null;for(const c of CITY)c.bgl=0;const act=[];
+for(const e of BG){if(F!=="all"&&e.id!==F)continue;const t=S.now-e.t0;if(t<0||t>e.life)continue;act.push(e);const cd=e.cand;let n=0;while(n<cd.length&&cd[n][0]<=t)n++;e.n=n;
+if(n>0&&!e.live){const tau=t-cd[0][0],le=Math.max(5,120/Math.pow(n,.9)),ang=hs(e.seed,2)*6.283;e.Me=e.M-1.2*Math.exp(-tau/18)+(hs(e.seed,1)-.5)*(.4*Math.exp(-tau/30)+.25);e.est={lat:e.lat+le*.6*Math.sin(ang)/111.2,lon:e.lon+le*.6*Math.cos(ang)/(111.2*Math.cos(e.lat*Math.PI/180)),r:le};
+for(let j=n-1;j>=0&&cd[j][0]>=t-70;j--){const c=cd[j],i=c[1],a=t-c[0];STT[i]=STT[i]<0?a:Math.min(STT[i],a);if(t>=c[2]&&c[3]>STS[i])STS[i]=c[3]}}
+e.iss=t>=e.ti;if(e.iss&&!e.warned){e.warned=1;if(performance.now()-e.rt0<40000)announceBG(e)}
+if(e.iss&&e.Me>=4.8&&e.est){const L=rupLen(e.Me),Lt=rupLen(e.M);e.nx=null;CITY.forEach((c,ci)=>{const de=hav(e.est.lat,e.est.lon,c[2],c[1]),fm=estimateMMI(e.Me,Math.hypot(Math.max(0,de-L/2),e.dep),land[c.k]?amp[c.k]:0);
+if(t>=e.cd[ci]/3.9){const mo=estimateMMI(e.M,Math.hypot(Math.max(0,e.cd[ci]-Lt/2),e.dep),land[c.k]?amp[c.k]:0);if(mo>=3.5)c.bgl=Math.max(c.bgl,SH(mo))}else{if(fm>=3.5)c.bgl=Math.max(c.bgl,SH(fm));if(fm>=5){const rem=de/3.9-t;if(!e.nx||rem<e.nx.rem)e.nx={c,rem,fm}}}});
+if(S.home){const de=hav(e.est.lat,e.est.lon,S.home.lat,S.home.lon),fm=estimateMMI(e.Me,Math.hypot(Math.max(0,de-L/2),e.dep),land[S.home.k]?amp[S.home.k]:0);if(t<de/3.9&&fm>=5)e.nx={c:HC(),rem:de/3.9-t,fm}}
+if(e.nx&&(!best||e.nx.rem<best.rem))best={...e.nx,e}}}
+o.n=act.length;
+if(best){const rem=Math.max(0,best.rem);o.alarm=true;o.big=mmss(rem);o.sub=`until strong shaking in ${best.c[0]} · ${TAG[best.e.kind].toLowerCase()} M${best.e.Me.toFixed(1)} (est.)`;o.bn=`Earthquake early warning: strong shaking in ${best.c[0]} in ${mmss(rem)}`;o.st="Early warning issued"}
+act.sort((a,b)=>b.Me-a.Me);if(typeof F==="number"&&act.length){const e=act[0];evMM(e);o.mm=mmRow(mmFc(e,e.Me,e.dep,e.dfc),mmObs(e,S.now-e.t0,e.dep))+(e.live?usgsHTML(e):"")}
+if(act.length)o.ls=(o.mm||"")+`<div class="nvh" style="margin-top:8px"><span>Active events (${act.length})</span><span>estimates</span></div>`+act.slice(0,6).map(e=>{if(e.est)e.pl=e.pl||placeName(e.est.lat,e.est.lon);const stt=!e.iss?(e.n?"analyzing…":"not detected yet"):e.nx?`strong shaking at ${e.nx.c[0]} in ${mmss(Math.max(0,e.nx.rem))}`:e.Me<4.8?"minor":"no strong shaking expected";return`<div class="nr"><span style="color:${BGC[e.kind]}">${TAG[e.kind]}${e.live?" · USGS"+(e.usgs&&e.usgs.p.status!=="reviewed"?" (unverified)":""):""}${e.sig?" ★":""}</span><span>M${e.Me.toFixed(1)} · ${Math.round(e.dep)} km deep ${e.pl||""} · ${stt}${e.sig?" · "+e.why:""}${e.live&&e.usgs&&safeUrl(e.usgs.p.url)?` · <a href="${esc(safeUrl(e.usgs.p.url))}" target="_blank" rel="noopener" style="color:#7dd3fc">USGS ↗</a>`:""}</span></div>`}).join("");
+return o}
+
+// ---- Tsunami forecasts for random / background earthquakes (M6.8+, shallow, offshore). Forecast only: travel time and attenuation use the same solver as the mainshock, no wave simulation.
+
+function simReset(){eta.fill(0);uu.fill(0);vv.fill(0);maxE.fill(0);arrT.fill(-1);pkT.fill(0);inund.fill(0);ru.fill(0);if(S.pr)S.pr.rec=[];CITY.forEach(c=>{c.arr=null;c.mx=0;c.rec=[];c.lv=0;c.pk=0;c.lt=undefined})}
+// Random-event tsunamis feed the same shallow-water solver as the mainshock: the sea-floor displacement is added to the live wave field (linear superposition).
+function injectTsu(e,AM){const k0=idx(e.lon,e.lat),L=rupLen(e.M),srcW=Math.max(35,Math.min(85,L*.035)),pts=e.pts||rupt(k0,L),R=L/2+3*2.7*srcW;
+let ts=S.tsu;if(!ts||ts.done){simReset();ts=S.tsu={t:0,done:false,em:AM,sg:srcW,n:0,ra0:H-2,ra1:1}}
+const cy=((90-e.lat)*RZ)|0,cx=((e.lon+180)*RZ)|0,rr=Math.ceil(R/CS),px=pts.map(p=>((p[0]+540)%360)-180),py=pts.map(p=>p[1]);let y0=H,y1=0;
+for(let a=-rr;a<=rr;a++){const y=cy+a;if(y<1||y>=H-1)continue;const rx=Math.ceil(rr/Math.max(.2,cosR[y]));for(let b=-rx;b<=rx;b++){const x=(cx+b+W*2)%W,q=y*W+x;if(land[q])continue;const lo=-180+(x+.5)/RZ,la=90-(y+.5)/RZ;let m=1e12;
+for(let i=0;i<px.length;i++){let dx=lo-px[i];if(dx>180)dx-=360;else if(dx<-180)dx+=360;dx*=111.2*cosR[y];const dy=(la-py[i])*111.2,d=dx*dx+dy*dy;if(d<m)m=d}
+const d=Math.sqrt(m);if(d>R)continue;const z=AM*(Math.exp(-.5*sq(d/srcW))-.22*Math.exp(-.5*sq(d/(srcW*2.7))));if(Math.abs(z)>.008){eta[q]+=z;if(y<y0)y0=y;if(y>y1)y1=y}}}
+if(y0>y1)return null;ts.ra0=Math.max(1,Math.min(ts.ra0,y0-3));ts.ra1=Math.min(H-2,Math.max(ts.ra1,y1+3));ts.em=Math.max(ts.em,AM);S.dirty=true;return ts}
+const BTS=[];let lastBTsay=0;
+function tsuField(si){const n=CW*CH,et2=new Float64Array(n).fill(1e9),ls=new Float32Array(n);if(!TZR)tzInit();const hk=[],hn=[];
+const push=(t,v)=>{let i=hk.length;hk.push(t);hn.push(v);while(i>0){const p=(i-1)>>1;if(hk[p]<=t)break;hk[i]=hk[p];hn[i]=hn[p];i=p}hk[i]=t;hn[i]=v};
+const pop=()=>{const t=hk[0],v=hn[0],lt=hk.pop(),lv=hn.pop(),m=hk.length;if(m){let i=0;for(;;){let c=2*i+1;if(c>=m)break;if(c+1<m&&hk[c+1]<hk[c])c++;if(hk[c]>=lt)break;hk[i]=hk[c];hn[i]=hn[c];i=c}hk[i]=lt;hn[i]=lv}return[t,v]};
+et2[si]=0;push(0,si);
+while(hk.length){const[t,i]=pop();if(t>et2[i])continue;const x=i%CW,y=(i/CW)|0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){if(!a&&!b)continue;const yy=y+a;if(yy<0||yy>=CH)continue;const j=yy*CW+(x+b+CW)%CW;if(cdep[j]<=0)continue;
+const sk=Math.hypot(b*CS*4*cosR[y*4+2],a*CS*4),nt=t+sk*1000/Math.sqrt(9.81*(Math.max(20,cdep[i])+Math.max(20,cdep[j]))/2);if(nt<et2[j]){et2[j]=nt;ls[j]=ls[i]+sk*(tsuRate((cdep[i]+cdep[j])/2)+TZR[j]);push(nt,j)}}}
+return{et:et2,ls}}
+function bgTsu(e){if(!$("ts").checked||e.M<6.8||e.dep>70||elev[idx(e.lon,e.lat)]>=-30)return;
+const cx=(((e.lon+180)*RZ)|0)>>2,cy=(((90-e.lat)*RZ)|0)>>2;let si=-1,bd=1e9;
+for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++){const yy=cy+a;if(yy<0||yy>=CH)continue;const ci=yy*CW+(cx+b+CW)%CW;if(cdep[ci]>0){const d=a*a+b*b;if(d<bd){bd=d;si=ci}}}
+if(si<0)return;const F=tsuField(si),kk=[],ek=[],ea=[];
+for(const[arr,f]of[[L1,1],[L2,.55]])for(const k of arr){const o=no[k],ox=(o%W)>>2,oy=((o/W)|0)>>2;let bl=1e9,be=0;for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++){const yy=oy+a;if(yy<0||yy>=CH)continue;const j=yy*CW+(ox+b+CW)%CW;if(F.et[j]<1e8){const v=F.ls[j]+Math.max(0,F.et[j]-64800)/18000;if(v<bl){bl=v;be=F.et[j]}}}if(bl<1e8){kk.push(k);ek.push(f*Math.exp(-bl));ea.push(be)}}
+const cpe=new Float32Array(CITY.length),cek=new Float32Array(CITY.length);let mx=0;
+CITY.forEach((c,ci)=>{if(c.cq>=0&&F.et[c.cq]<1e8){cpe[ci]=F.et[c.cq]*(1+(hs(e.seed,c.k%97)-.5)*.04)+1;cek[ci]=Math.exp(-F.ls[c.cq]-Math.max(0,F.et[c.cq]-64800)/18000);if(cpe[ci]>mx)mx=cpe[ci]}});
+const kf=e.ft==="t"?.45:e.ft==="s"||!e.ft?1:.7,amf=Me=>kf*10**(.6*(Me-7))*Math.exp(-e.dep/250),simTs=injectTsu(e,amf(e.M));
+BTS.push({id:e.id,e,simRef:simTs,ts0:simTs?simTs.t:0,am:amf,AMm:0,kk:Int32Array.from(kk),ek:Float32Array.from(ek),ea:Float32Array.from(ea),cpe,cek,hm:new Float32Array(CITY.length),tI:(e.ti<1e8?e.ti:420)+60,issued:0,mx,updAt:0,updWhy:""});e.bt=1;
+while(BTS.length>12)BTS.shift()}
+function btsNerv(F){const o={ls:"",pl2:"",alarm:false,big:"",sub:"",bn:"",bl:0,lv:0};for(const c of CITY)c.btl=0;
+for(let i=BTS.length-1;i>=0;i--){const b=BTS[i],t=S.now-b.e.t0;if(t<0||t>86400||t>b.mx+17400){BTS.splice(i,1);S.dirty=true}}
+let best=null;
+for(const b of BTS){if(F!=="all"&&b.id!==F)continue;const t=S.now-b.e.t0;if(t<b.tI)continue;const live=!!(S.tsu&&S.tsu===b.simRef),tt=live?S.tsu.t-b.ts0:t,Me=S.nerv?b.e.Me:b.e.M;if(Me==null)continue;const am=b.am(Me);if(am>b.AMm)b.AMm=am;
+const rows=[],up=[];let mxl=0;
+CITY.forEach((c,ci)=>{const pe=b.cpe[ci];if(!pe)return;const fh=b.AMm*b.cek[ci],ob=live&&c.arr!=null&&c.arr>=b.ts0-1?4*c.mx:null,h0=b.hm[ci],h=Math.max(h0,fh,ob||0);b.hm[ci]=h;const dd=Math.floor(Math.max(0,t-(b.mxw||b.mx))/5400),l=Math.max(0,lvl(h)-dd),l0=Math.max(0,lvl(h0)-dd);if(lvl(h)>0&&pe>(b.mxw||0))b.mxw=pe;if(l>l0&&b.issued)up.push(c);c.fl2=l;if(l>mxl)mxl=l;if(l>0){c.btl=Math.max(c.btl,l);rows.push({c,h,fh,ob,l,rem:pe-tt})}});
+if(!b.issued){b.issued=1;S.dirty=true;if(rows.length&&t-b.tI<600){const g=l=>rows.filter(r=>r.l===l).sort((a,c)=>a.rem-c.rem).map(r=>r.c[0]);b.e.pl=b.e.pl||placeName(b.e.lat,b.e.lon);playSc(mxl>=3?"tmaj":"tsu",1);say(`Tsunami information. ${TAG[b.e.kind]} magnitude ${Me.toFixed(1)} ${b.e.pl}, depth ${Math.round(b.e.dep)} kilometers.`);if(g(3).length)sayList("Major tsunami warning for",g(3));if(g(2).length)sayList("Tsunami warning for",g(2));if(g(1).length)sayList("Tsunami advisory for",g(1))}}
+else if(up.length){b.updAt=performance.now();b.updWhy=up.some(c=>c.arr!=null)?"adjusted to observed waves":"magnitude revised to "+Me.toFixed(1);S.dirty=true;const nr=performance.now();if(nr-lastBTsay>8000&&t-b.tI<3600){lastBTsay=nr;playSc(up.some(c=>c.fl2>=3)?"tmaj":"tsu",1);if(!(window.speechSynthesis&&speechSynthesis.speaking))say(`Tsunami forecast updated. Upgraded: ${up.slice(0,4).map(c=>c[0]+", "+ALN[c.fl2].toLowerCase()).join("; ")}.`)}}
+if(rows.length){rows.sort((a,c)=>a.rem-c.rem);const upd=performance.now()-b.updAt<8000,pl=b.e.pl||placeName(b.e.lat,b.e.lon);b.e.pl=pl;const hd=`${TAG[b.e.kind]} M${Me.toFixed(1)} ${pl} · ${Math.round(b.e.dep)} km deep`;
+const txt=r=>r.ob!=null?`<b>Observed ${r.ob.toFixed(1)} m</b> (forecast ${r.fh.toFixed(1)} m) · ${ALN[r.l]}`:`Forecast ${r.h.toFixed(1)} m · ${ALN[r.l]} · ${r.rem>30?"arrives in "+hms(r.rem):r.rem>-1800?"wave due now":"wave arrived"}`;
+o.ls+=`<div class="nvh" style="margin-top:8px"><span>Tsunami · ${hd}${upd?` <b style="color:#ffd60a">· FORECAST UPDATED (${b.updWhy})</b>`:""}</span><span>${live?"wave model running":"forecast only"} · clock ${hms(tt)}</span></div>`+rows.slice(0,6).map(r=>`<div class="nr"><span>${r.c[0]}</span><span style="color:${ALC[r.l]}">${txt(r)}</span></div>`).join("");
+o.pl2+=`<div style="margin-top:4px"><b>Tsunami · ${hd}</b>${upd?` <b style="color:#ffd60a">· FORECAST UPDATED</b>`:""}</div>`+rows.slice(0,5).map(r=>`<div style="color:${ALC[r.l]}">● ${ALN[r.l]} · ${r.c[0]} · ${txt(r).replace(/<\/?b>/g,"")}</div>`).join("");
+for(const r of rows)if(r.rem>-60&&r.ob==null&&(!best||r.rem<best.rem)&&r.l>=1)best={...r,b}}}
+if(best){const rm=best.rem;o.big=rm<=30?"Due now":hms(rm);o.sub=`until tsunami ${ALN[best.l].toLowerCase()} at ${best.c[0]} · forecast ${best.h.toFixed(1)} m (${TAG[best.b.e.kind].toLowerCase()} M${best.b.e.M.toFixed(1)}, ${Math.round(best.b.e.dep)} km deep)`;o.alarm=best.l>=2;o.bl=best.l>=3?3:best.l>=2?2:0;o.lv=best.l;o.bn=`⚠ TSUNAMI ${ALN[best.l].toUpperCase()} — ${best.c[0]} ${rm<=30?"wave due now":"in "+hms(rm)}`;o.any=1}
+return o}
+function sandboxBG(){const o=btsNerv("all");S.bgbn=o.any?o.bn:"";S.bglv=o.lv||2;const h=AL()?o.pl2:"";if($("bgp").innerHTML!==h)$("bgp").innerHTML=h}
+function tsuForecast(Me){const q=S.q,ts=S.tsu,AM=.4*10**(.6*(Me-7))*Math.exp(-q.depth/120),r0=ts.sg+60;
+eew(AM,ts.sg);
+for(const c of CITY){if(c.cq>=0&&et[c.cq]<1e8){c.fpe=c.pe*(1+(hs(q.seed,c.k%97)-.5)*.04);c.fpr=c.pr;c.fl=lvl(c.fpr)}else{c.fpe=0;c.fpr=0;c.fl=0}}
+fru.fill(0);fat.fill(1e9);for(const[arr,f]of[[L1,1],[L2,.55]])for(const k of arr){const o=no[k],x=o%W,y=(o/W)|0;let best=0,bd=1e9;for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++){const yy=y+a,xx=(x+b+W)%W;if(yy<0||yy>=H)continue;const z=yy*W+xx;if(!land[z]&&tsuAmp[z]>0){const d=Math.hypot(a,b);if(d<bd){bd=d;best=tsuAmp[z]}}}fru[k]=f*best*4;const cx=x>>2,cy=y>>2;let btime=1e9;for(let a=-2;a<=2;a++)for(let d=-2;d<=2;d++){const yy=cy+a;if(yy<0||yy>=CH)continue;const v=et[yy*CW+(cx+d+CW)%CW];if(v<btime)btime=v}fat[k]=btime}
+fru0.set(fru);for(const c of CITY){c.f0=c.fpr;c.fl0=c.fl}q.fcMe=Me;q.fcT=performance.now();q.s=1;q.fcDone=1;S.dirty=true}
+function tsuNotify(prev,why){const q=S.q,up=[];let mx=0;CITY.forEach((c,i)=>{if(c.arr==null&&c.fl>prev[i]){up.push(c);if(c.fl>mx)mx=c.fl}});q.updAt=performance.now();q.updWhy=why;
+if(!up.length||q.t-(q.ti+90)>3600||performance.now()-(q.lastUpSay||0)<8000)return;q.lastUpSay=performance.now();playSc(mx>=3?"tmaj":"tsu",1);up.sort((a,b)=>b.fl-a.fl||a.fpe-b.fpe);if(!(window.speechSynthesis&&speechSynthesis.speaking))say(`Tsunami forecast updated, ${why}. Upgraded: ${up.slice(0,4).map(c=>c[0]+", "+ALN[c.fl].toLowerCase()).join("; ")}.`)}
+function tsuRefresh(){const q=S.q,now=performance.now();if(now-q.fcT<3000)return;
+if(Math.abs(q.Me-q.fcMe)>.06){const prev=CITY.map(c=>c.fl);tsuForecast(q.Me);tsuNotify(prev,"magnitude revised to "+q.Me.toFixed(1));return}
+let ls=0,n=0;for(const c of CITY)if(c.arr!=null&&c.f0>.3){ls+=Math.log(Math.max(.05,4*c.mx)/c.f0);n++}
+const sc2=n?Math.min(1.5,Math.max(.8,Math.exp(ls/n))):1;
+if(Math.abs(sc2-q.s)>.04){q.s=sc2;q.fcT=now;const prev=CITY.map(c=>c.fl);for(const c of CITY)if(c.arr==null&&c.f0>0){c.fpr=c.pe>3600?c.f0*sc2:c.f0;c.fl=lvl(c.fpr)}for(const a of[L1,L2])for(const k of a)fru[k]=fat[k]>3600?fru0[k]*sc2:fru0[k];S.dirty=true;tsuNotify(prev,"adjusted to gauge readings")}}
+function nerv(){if(!S.nerv)return;const q=S.q,ts=S.tsu,F=S.focus||"all",qin=F==="all"||F==="q";let bl=0;STS.fill(0);STT.fill(-1);let st="Monitoring",big="All quiet",sub=LIVEON()?"Live USGS data":ST.length+" stations online",ev="",ls="",alarm=false,bn="";
+if(!q||!qin){CITY.forEach(c=>c.ev=0)}else{const t=q.t;let n=0;for(let i=0;i<ST.length;i++){const s=ST[i];if(t>=s.tp){n++;STT[i]=t-s.tp}if(t>=s.dS)STS[i]=Math.max(STS[i],mmi[s.k]+s.nz)}
+if(n>0){const tau=t-q.t1;q.Me=q.M-1.5*Math.exp(-tau/22)+(hs(q.seed,1)-.5)*(.5*Math.exp(-tau/40)+.3);const unc=.9*Math.exp(-tau/30)+.15,le=Math.max(6,180/Math.pow(n,.9)),ang=hs(q.seed,2)*6.283;
+q.est={lat:q.lat+le*.6*Math.sin(ang)/111.2,lon:q.lon+le*.6*Math.cos(ang)/(111.2*Math.cos(q.lat*Math.PI/180)),r:le};
+if(Math.abs(q.Me-(q.lm??-9))>.04){q.lm=q.Me;S.dirty=true}
+ev=n<2?`First trigger: ${q.first.n}. Waiting for more stations…`:`Magnitude ≈ ${q.Me.toFixed(1)} ±${unc.toFixed(1)} (estimate) · epicenter ≈ ${q.est.lat.toFixed(1)}°, ${q.est.lon.toFixed(1)}° ±${Math.round(le)} km · depth ${q.depth} km (simulation input)<br>First trigger: ${q.first.n} at T+${q.t1.toFixed(1)} s · ${n}/${ST.length} stations triggered`;
+ls+=mmRow(mmFc(q,q.Me,q.depth,(i,Me)=>{const k=q.lc[i];return estimateMMI(Me,Math.hypot(q.ds[i],q.depth),amp[k])}),mmObs(q,t,q.depth));
+st=t<q.ti?`P-wave detected · ${n} station${n>1?"s":""} triggered`:"Early warning issued";
+if(t<q.ti){big="Analyzing…";sub=`Warning is issued once 3 stations confirm (${Math.min(n,3)}/3)`}
+else{
+const L=rupLen(q.Me);let nx=null;const fr=c=>{const de=q.est?hav(q.est.lat,q.est.lon,c[2],c[1]):c.dp;c.fm=estimateMMI(q.Me,Math.hypot(Math.max(0,de-L/2),q.depth),amp[c.k]);c.se=Math.hypot(de,q.depth)/3.9;const arr=t>=Math.hypot(c.dp,q.depth)/3.9;c.sh=SH(arr?mmi[c.k]:c.fm);if(!arr&&c.fm>=5&&(!nx||c.se<nx.se))nx=c;return c},rows=CITY.map(fr);if(S.home){const hc=HC();hc.dp=hav(q.lat,q.lon,hc[2],hc[1]);rows.push(fr(hc))}
+if(!q.arv&&rows.some(c=>t>=Math.hypot(c.dp,q.depth)/3.9&&mmi[c.k]>=5)){q.arv=1;playSc("arrive")}
+if(!q.chimed)warn(q,rows,nx);else if(!q.major&&q.Me>=7.8&&nx)upgrade(q,rows);
+if(nx){alarm=true;bl=2;q.alarmed=1;const rem=Math.max(0,nx.se-t);big=mmss(rem);sub=`until strong shaking in ${nx[0]} · forecast MMI ${ro(nx.fm)}`;bn=`Earthquake early warning: strong shaking in ${nx[0]} in ${mmss(rem)}`;const rc=Math.ceil(rem);if(rc<=10&&rc>0&&rc!==q.tk){q.tk=rc;beep(1100,.06);if([10,5,3,2,1].includes(rc))say(String(rc),1)}}
+else{big="No further warnings";sub="Shaking forecast complete";if(q.alarmed&&!q.clr){q.clr=1;playSc("clear");say("No further strong shaking is expected.")}}
+ls+=`<div class="nvh" style="margin-top:8px"><span>Shaking</span><span>forecast, then observed</span></div>`+rows.filter(c=>c.fm>=3.5||mmi[c.k]>=3.5||(c.home&&c.fm>=2)).sort((a,b)=>(b.home?1:0)-(a.home?1:0)||a.dp-b.dp).slice(0,9).map(c=>{const arr=t>=Math.hypot(c.dp,q.depth)/3.9;const tx=arr?`<b>Observed MMI ${ro(mmi[c.k])}</b> <span style="color:#8ea1b3">(forecast ${ro(c.fm)})</span>`:Math.hypot(c.dp,q.depth)/3.9<q.ti?"Blind zone: shaking arrives before the warning":`Forecast MMI ${ro(c.fm)} · S-wave in ${mmss(Math.max(0,c.se-t))}`;return`<div class="nr"><span>${c[0]}</span><span style="color:${ALC[c.sh]||"#8ea1b3"}">${tx}</span></div>`}).join("");
+if(ts&&t>=q.ti+90){if(!q.fcDone){tsuForecast(q.Me);tsuAlert()}else tsuRefresh();if(!q.tarr){const c0=CITY.find(c=>c.arr!=null&&lvl(4*c.mx)>=1);if(c0){q.tarr=1;playSc("tarr");say(`Tsunami waves are arriving at ${c0[0]}.`)}}const cdq=c=>S.dq||0,T=CITY.filter(c=>c.fl>cdq(c)||(c.arr!=null&&lvl(4*c.mx)>cdq(c))).sort((a,b)=>(a.fpe||1e9)-(b.fpe||1e9)).slice(0,8);
+const upd=q.updAt&&performance.now()-q.updAt<8000,ph=Math.floor(performance.now()/350)%2;
+ls+=`<div class="nvh" style="margin-top:8px"><span>Tsunami${upd?` <b style="color:#ffd60a;opacity:1">· FORECAST UPDATED (${q.updWhy})</b>`:""}</span><span>forecast, then observed · clock ${hms(ts.t)}</span></div>`+T.map(c=>{const ob=c.arr!=null,lv=Math.max(0,(ob?lvl(4*c.mx):c.fl)-cdq(c)),bk=1,tx=ob?`<b>Observed ${(4*c.mx).toFixed(1)} m</b> <span style="color:#8ea1b3">(forecast ${c.fpr.toFixed(1)} m)</span>`:`Forecast ${c.fpr.toFixed(1)} m · ${ALN[c.fl]} · ${c.fpe-ts.t<=30?"wave due now":"arrives in "+hms(c.fpe-ts.t)}`;return`<div class="nr" style="opacity:${bk?1:.25}"><span>${c[0]}</span><span style="color:${lv?ALC[lv]:"#8ea1b3"}">${tx}</span></div>`}).join("");
+if(!alarm){const nt=T.filter(c=>c.arr==null&&c.fl>=1).sort((a,b)=>a.fpe-b.fpe)[0];if(nt){big=nt.fpe-ts.t<=30?"Due now":hms(nt.fpe-ts.t);sub=`until tsunami ${ALN[nt.fl].toLowerCase()} at ${nt[0]} · forecast ${nt.fpr.toFixed(1)} m`;alarm=nt.fl>=2;bl=nt.fl>=3?3:nt.fl>=2?2:0;bn=`Tsunami ${ALN[nt.fl].toLowerCase()}: ${nt[0]} ${nt.fpe-ts.t<=30?"wave due now":"in "+hms(nt.fpe-ts.t)}`}}}
+else if(ts)ls+=`<div class="nr"><span>Tsunami</span><span>Analyzing…</span></div>`}}}
+{const bg=bgNerv(F);if(F!=="all"&&F!=="q"&&!bg.n)ls+=`<div class="nr"><span>Event</span><span>no longer tracked</span></div>`;if(typeof F==="number"&&!BTS.some(b=>b.id===F))ls+=`<div class="nr"><span>Tsunami</span><span>none expected for this event</span></div>`;if(!alarm&&bg.alarm){alarm=true;bl=2;big=bg.big;sub=bg.sub;bn=bg.bn;st=bg.st}else if(!q&&bg.n){st="Monitoring · "+bg.n+" active event"+(bg.n>1?"s":"");sub=LIVEON()?"Live USGS data":ST.length+" stations online"}ls+=bg.ls;if(bg.n&&S.fr%30===0)S.dirty=true}
+{const bt=btsNerv(F);ls+=bt.ls;if(!alarm&&bt.any){alarm=bt.alarm;bl=bt.bl;big=bt.big;sub=bt.sub;bn=bt.bn;st="Tsunami information issued"}}
+for(const c of CITY){const sh=q&&q.t>=q.ti&&c.sh!=null?c.sh:0;let tl=0;if(q&&qin&&q.fcDone)tl=Math.max(0,(c.arr!=null?lvl(4*c.mx):(c.fl||0))-(S.dq||0));c.ev=Math.max(qin?sh:0,qin?tl:0,c.bgl||0,c.btl||0)}
+$("nvst").textContent=st;$("nvnet").textContent=ST.length+" stations";$("nvbig").textContent=big;$("nvsub").textContent=sub;$("nvev").innerHTML=ev;$("nvls").innerHTML=ls;document.body.classList.toggle("nv-alert",alarm);$("bn").textContent=bn;$("bn").style.display=bn?"block":"none";const bc2="";$("bn").className=bc2;$("nvbig").className=bc2;if(S.fr%60===0)refreshEvSel()}
+// EEW console: tap a quake on the map to focus on just that event (tap it again to show all events)
+function nervTap(px,py){const F=S.focus||"all";let best=null,bd=1e9;const tryP=(id,lon,lat,tg)=>{const d=Math.hypot(X(lon)-px,Y(lat)-py);if(d<=22&&d<bd){bd=d;best=id}};
+if(S.q&&(F==="all"||F==="q"))tryP("q",S.q.est?S.q.est.lon:S.q.lon,S.q.est?S.q.est.lat:S.q.lat);
+for(const e of BG){if(F!=="all"&&e.id!==F)continue;const t=S.now-e.t0;if(t<0||t>e.life||t<e.ti)continue;const p=e.est||e;tryP(e.id,p.lon,p.lat)}
+if(best==null)return;setFocus(best===F?"all":String(best));$("hint").textContent=best===F?"Showing all events":"Focused on one event · tap it again to show all"}
+function tapQuake(px,py){let best=null,bd=1e9;for(const e of BG){const t=S.now-e.t0;if(t<0||t>e.life)continue;if(!e.sig&&t>60&&e.M<5)continue;const r=Math.max(3,Math.min(14,2.5+(e.M-3.5)*2.2)),d=Math.hypot(X(e.lon)-px,Y(e.lat)-py);if(d<=Math.max(r,10)+10&&d<bd){bd=d;best=e}}
+if(!best)return false;const e=best,b=BTS.find(b=>b.id===e.id);let tl=0;if(b)for(const h of b.hm)tl=Math.max(tl,lvl(h));S.sel=e;S.selT=performance.now();
+$("info").innerHTML=`<b>${TAG[e.kind]} M${e.M.toFixed(1)}</b> · ${placeName(e.lat,e.lon)} · ${Math.round(e.dep)} km deep · ${hms(S.now-e.t0)} ago`+(e.cm>=2?` · max city MMI ${ro(e.cm)} (${e.cc})`:"")+(b?` · tsunami ${tl?ALN[tl]:"forecast, no warning"}`:" · no tsunami")+(e.why?` · ${e.why}`:"")+(e.live?usgsHTML(e,1):"");S.dirty=true;return true}
+function info(lon,lat){if(S.selT&&performance.now()-S.selT<8000)return;const k=idx(lon,lat),f=fid[k]>=0?FL[fcell[fid[k]]-1]:null;let s=`${lat.toFixed(1)}°, ${hit(lon,0)[0].toFixed(1)}° · `+(land[k]?`${Math.round(elev[k])} m · ${CN[cls[k]]} · ${T[k].toFixed(0)}°C · ${Math.round(P[k])} mm/yr`:`ocean ${Math.round(-elev[k])} m deep`);if(f)s+=` · ${f.n} ${Math.round(fdist[k]*CS)} km away`;if(S.q)s+=` · event depth ${S.q.depth} km`;$("info").textContent=s}
+const SPD=[1,2,5,10,30,60,120,300,600,1800,3600,7200];let lastT=performance.now();
+function step(){const now=performance.now(),rd=Math.min(.1,(now-lastT)/1000);lastT=now;if(!S.run)return;const m=SPD[+$("spd").value],sd=rd*m;bgStep(sd);
+if(S.storms.length||S.wet){const dh=sd/3600;if(S.storms.length){rain(dh);S.th+=dh}S.fa=(S.fa||0)+dh/3;let n=0;while(S.fa>=1&&n<8){flow();S.fa--;n++}if(S.fa>1)S.fa=1;S.dirty=true}
+if(S.tsu&&!S.tsu.done){const ts=S.tsu;ts.acc=(ts.acc||0)+sd;let n=0;while(ts.acc>=10&&n<8){const d=Math.min(30,ts.acc);swe(d);ts.acc-=d;n++}if(ts.acc>=10)ts.acc=0;
+if(n&&S.fr%2===0)inundate();
+for(const c of CITY)if(c.oc>=0){const e=maxE[c.oc],v=eta[c.oc];if(e>.12&&c.arr==null)c.arr=ts.t;if(e>c.mx){c.mx=e;c.pk=ts.t}if(c.arr!=null)c.lv=lvl(4*c.mx);if((v>.003||c.rec.length)&&ts.t-(c.lt??-1e9)>=60){c.rec.push(ts.t,v);c.lt=ts.t}}
+if(S.pr&&S.pr.oc>=0){const v=eta[S.pr.oc];if((v>.003||S.pr.rec.length)&&ts.t-(S.pr.lt??-1e9)>=60){S.pr.rec.push(ts.t,v);S.pr.lt=ts.t}}
+if(ts.t>=172800||(ts.t>14400&&ts.em<.02))ts.done=true;if(n)S.dirty=true}
+if(S.q&&S.q.t<S.q.tmax){const q=S.q;q.t+=sd;q.rev=3.9*q.t;if(q.rev-(q.lp??-99)>=15||q.t>=q.tmax){q.lp=q.rev;S.dirty=true}}}
+function loop(){requestAnimationFrame(loop);S.fr++;if(S.hp){hover(S.hp[0],S.hp[1]);S.hp=null}step();if(S.dirty){paint();S.dirty=false}draw();if(S.fr%6===0&&(S.q||S.th>0||S.tsu||BTS.length)){report();gauge()}if(S.fr%20===0){let d=0;const ts=S.tsu;if(ts){let m=0;for(const c of CITY)if(c.fpe>m&&(c.fl>0||c.arr!=null))m=c.fpe;if(m)d=Math.floor(Math.max(0,ts.t-m)/5400)}if(d!==S.dq){S.dq=d;S.dirty=true}}if(S.fr%3===0){nerv();if(!S.nerv)sandboxBG()}if(!S.nerv&&S.fr%30===0&&BG.length)S.dirty=true}
+// interaction
+const pts=new Map();let tap=null,pd=0,pm=null;
+cv.addEventListener("pointerdown",e=>{if(e.isPrimary){pts.clear();pd=0;pm=null}try{cv.setPointerCapture(e.pointerId)}catch(_){}pts.set(e.pointerId,{x:e.offsetX,y:e.offsetY});tap={x:e.offsetX,y:e.offsetY,m:false};S.touch=e.pointerType!=="mouse";if(S.touch&&$("rd").checked&&!S.nerv&&pts.size===1)S.hp=[e.offsetX,e.offsetY];if(pts.size===2){pm=null;const[a,b]=[...pts.values()];pd=Math.hypot(a.x-b.x,a.y-b.y);tap.m=true}});
+cv.addEventListener("pointermove",e=>{const p=pts.get(e.pointerId);if(!p){if(e.pointerType==="mouse"&&!S.nerv)S.hp=[e.offsetX,e.offsetY];return}const dx=e.offsetX-p.x,dy=e.offsetY-p.y;p.x=e.offsetX;p.y=e.offsetY;
+if(pts.size===1){if(Math.hypot(e.offsetX-tap.x,e.offsetY-tap.y)>(e.pointerType==="mouse"?6:16))tap.m=true;if(tap.m){if(S.touch&&$("rd").checked&&!S.nerv)S.hp=[e.offsetX,e.offsetY];else{view.cx-=dx/sc;view.cy+=dy/sc;clamp()}}}
+else if(pts.size===2){const[a,b]=[...pts.values()],d=Math.hypot(a.x-b.x,a.y-b.y);if(pd){view.z=Math.min(30,Math.max(1,view.z*d/pd))}pd=d;const mx2=(a.x+b.x)/2,my2=(a.y+b.y)/2;if(pm){view.cx-=(mx2-pm[0])/sc;view.cy+=(my2-pm[1])/sc}pm=[mx2,my2];clamp()}});
+const doUp=e=>{if(S.setHome&&pts.size===1&&tap&&!tap.m){S.setHome=0;const[lo,la]=scr2ll(tap.x,tap.y);if(la>-90&&la<90){const h=hit(lo,la);$("hc").value="";setHome(h[0],la,placeName(la,h[0]))}}else if(pts.size===1&&tap&&!tap.m&&!S.nerv&&tapQuake(tap.x,tap.y)){}else if(pts.size===1&&tap&&!tap.m&&S.nerv){nervTap(tap.x,tap.y)}else if(pts.size===1&&tap&&!tap.m&&!S.nerv){const[lo,la]=scr2ll(tap.x,tap.y);if(la>-90&&la<90){const h=hit(lo,la);info(h[0],h[1]);if(S.mode==="r")addStorm(h[0],la);else if(e.pointerType==="mouse"||!$("rd").checked)startSeq(h[0],la);else{const c=$("ct").checked&&CITY.find(c=>Math.hypot(X(c[1])-tap.x,Y(c[2])-tap.y)<14);c?probe(c[0],c[1],c[2]):probe("",h[0],la)}}}if(e.pointerType!=="mouse"&&S.hv&&$("rd").checked){S.pr=S.hv;S.hv=null;S.pr.rec=[];$("gs").value="p";$("tip").style.display="none"}pts.delete(e.pointerId);pd=0;pm=null};
+const up=e=>{try{doUp(e)}catch(err){$("hint").textContent="Error: "+err.message}finally{pts.delete(e.pointerId);pd=0;pm=null}};const rel=e=>{pts.delete(e.pointerId);pd=0;pm=null};cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",rel);cv.addEventListener("lostpointercapture",rel);addEventListener("touchend",e=>{if(!e.touches.length){pts.clear();pd=0;pm=null}});addEventListener("touchcancel",e=>{if(!e.touches.length){pts.clear();pd=0;pm=null}});cv.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse"){S.hv=null;S.hp=null;S.pr?probeText(S.pr):$("pb").innerHTML="";$("tip").style.display="none";$("cp").style.display="none"}});
+cv.addEventListener("wheel",e=>{e.preventDefault();view.z=Math.min(30,Math.max(1,view.z*(e.deltaY<0?1.15:.87)));clamp()},{passive:false});
+function clamp(){view.cx=Math.max(-180,Math.min(180,view.cx));view.cy=Math.max(-90,Math.min(90,view.cy))}
+document.querySelectorAll("#lay button").forEach(b=>b.onclick=()=>{S.lay=+b.dataset.l;document.querySelectorAll("#lay button").forEach(x=>x.classList.toggle("on",x===b));S.dirty=true});
+document.querySelectorAll("#mode button").forEach(b=>b.onclick=()=>{S.mode=b.dataset.m;document.querySelectorAll("#mode button").forEach(x=>x.classList.toggle("on",x===b));$("cq").classList.toggle("hide",S.mode!=="q");$("cr").classList.toggle("hide",S.mode!=="r");
+$("hint").textContent={q:"Click or tap the map to place an epicenter. Hover with a mouse, or switch on Touch read mode and drag a finger, to read wave heights.",r:"Tap the map to drop a rainstorm. Water drains downhill and pools in basins and coastal plains.",p:"Tap anywhere (open water, coast, or a city) to read the wave height, arrival time and flooding there. Inland cities show their distance from the sea."}[S.mode]});
+[["mag","mv"],["depth","zv"],["rate","iv"],["rad","rv"],["dur","dv"]].forEach(([a,b])=>$(a).oninput=()=>$(b).textContent=$(a).value);
+$("spd").oninput=()=>{const m=SPD[+$("spd").value];$("sv").textContent=m===1?"1× (real time)":m+"×"};
+$("nvb").onclick=()=>{S.nerv=!S.nerv;document.body.classList.toggle("nerv",S.nerv);if(!S.nerv)document.body.classList.remove("nv-alert");S.hv=null;S.hp=null;$("tip").style.display="none";$("nvb").textContent=S.nerv?"Exit EEW console":"EEW console";$("ttl").textContent=S.nerv?"Early warning monitor":"Earth Hazard Lab";setTimeout(size,0);if(!S.nerv)$("bn").style.display="none";S.dirty=true;report();nerv()};
+$("pp").onclick=()=>{S.run=!S.run;$("pp").textContent=S.run?"Pause":"Play"};
+function refreshEvSel(){const sel=$("evsel");if(!sel||document.activeElement===sel)return;const items=[["all","All events (overlapping)"]];if(S.q)items.push(["q",`Mainshock M${S.q.M.toFixed(1)} · ${S.q.fault}`]);else if(S.focus==="q")S.focus="all";
+for(let i=EVLOG.length-1,n=0;i>=0&&n<30;i--){const x=EVLOG[i];if(x.id!==S.focus&&(x.M<5||!BG.includes(x.e)))continue;n++;items.push([String(x.id),`${TAG[x.kind]} M${x.M.toFixed(1)} ${placeName(x.lat,x.lon)}${x.e&&x.e.bt?" · tsunami":""} · ${Math.round(x.e.dep)} km · ${hms(x.t0)}`])}
+if(typeof S.focus==="number"&&!items.some(it=>it[0]===String(S.focus))){const x=EVLOG.find(x=>x.id===S.focus);if(x)items.splice(2,0,[String(x.id),`${TAG[x.kind]} M${x.M.toFixed(1)} ${placeName(x.lat,x.lon)} · ${hms(x.t0)}`])}
+const key=JSON.stringify(items)+S.focus;if(key===S.evkey)return;S.evkey=key;sel.innerHTML=items.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");sel.value=String(S.focus||"all");if(sel.value!==String(S.focus||"all")){S.focus="all";sel.value="all"}}
+function setFocus(v){const old=typeof S.focus==="number"?EVLOG.find(x=>x.id===S.focus):null;if(old&&old.e){old.e.pin=0;old.e.life=old.e.life0}
+S.focus=v==="all"||v==="q"?v:+v;if(typeof S.focus==="number"){const x=EVLOG.find(x=>x.id===S.focus);if(x){x.e.pin=1;x.e.life=1e12;if(!BG.includes(x.e))BG.push(x.e);evMM(x.e)}}S.dirty=true;S.evkey="";nerv()}
+$("evsel").onchange=()=>setFocus($("evsel").value);
+$("rs").onclick=()=>{S.sel=null;S.selT=0;S.dq=0;S.bas=[];BTS.length=0;S.bgbn="";$("bgp").innerHTML="";EVLOG.length=0;S.focus="all";S.evkey="";clearQ();S.storms=[];wd.fill(0);soil.fill(0);S.th=0;S.wet=0;A=[];mk.fill(0);st=1;dw.fill(0);BG.length=0;S.sq=[];S.pend=null;S.as=null;S.pr=null;$("pb").innerHTML="";$("eew").innerHTML="";$("bn").style.display="none";$("gw").classList.add("hide");$("rep").innerHTML="";S.run=true;$("pp").textContent="Pause";S.dirty=true};
+$("ws").innerHTML='<option value="r">Random each warning</option>'+SND.map((x,i)=>`<option value="${i}">${i+1}. ${x[0]}</option>`).join("");$("ws").value=String(SND.findIndex(x=>x[0]==="WEA attention signal"));initHome();modeBadge();try{if("serviceWorker"in navigator&&location.protocol==="https:"||location.hostname==="localhost")navigator.serviceWorker.register("sw.js")}catch(e){};
+const SCN=[["main","Earthquake early warning","WEA attention signal"],["major","Major earthquake (M7.8+)","Extreme alert (WEA + siren)"],["after","Aftershock (M5+)","Phone alert tri-tone"],["tsu","Tsunami advisory / warning","Tsunami siren"],["tmaj","Major tsunami warning","Extreme alert (WEA + siren)"],["tarr","Tsunami arriving","Church bell"],["arrive","Strong shaking arrives","Heartbeat"],["clear","All clear","Wind chimes"]];
+$("scs").innerHTML=SCN.map(([id,lb])=>`<label>${lb}<select id="sc_${id}" style="width:100%"><option value="d">Use default sound</option><option value="r">Random</option>${SND.map((x,i)=>`<option value="${i}">${i+1}. ${x[0]}</option>`).join("")}</select></label>`).join("");
+SCN.forEach(([id,lb,nm])=>$("sc_"+id).value=String(SND.findIndex(x=>x[0]===nm)));
+[["rqs","rqsv"],["rqf","rqfv"]].forEach(([a,b])=>$(a).oninput=()=>$(b).textContent=(+$(a).value).toFixed(2));
+$("wp").onclick=()=>playSel(1,true);$("wv").onclick=()=>say("This is a test of the early warning voice. Strong shaking is expected in Tokyo, Osaka, and Nagoya.",1);
+$("al").onchange=()=>{S.dirty=true;report()};
+addEventListener("resize",size);
+setTimeout(()=>{try{build();$("gs").add(new Option("Clicked point","p"));CITY.forEach((c,i)=>{if(c.oc>=0)$("gs").add(new Option(c[0],i))});$("gs").onchange=gauge;size();$("ld").remove();S.dirty=true;loop()}catch(e){$("ld").textContent="Error: "+e.message}},30);
+</script></body></html>
