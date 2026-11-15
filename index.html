@@ -39,7 +39,7 @@ body.nv-alert #nv{border-color:#ff5a4d;animation:nvg 1s ease-in-out infinite}bod
 body.nerv #bn{background:#b42318!important;color:#fff!important;border-radius:8px}
 details{margin-top:8px}summary{cursor:pointer;color:var(--mu)}#legend{position:absolute;right:7px;top:7px;z-index:2;background:#071521d9;color:#f4f7fa;border:1px solid #ffffff35;border-radius:7px;padding:6px 8px;font-size:10px;line-height:1.55;pointer-events:none;max-width:170px}#legend .sw{display:inline-block;width:15px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}body.nerv #legend{display:none}@keyframes bk{50%{opacity:.2}}#bn.blink,#nvbig.blink{animation:bk .8s steps(1,end) infinite}#bn.blink3,#nvbig.blink3{animation:bk .4s steps(1,end) infinite}#evw{display:block;margin:8px 0 2px;color:var(--mu)}#evsel{width:100%;margin-top:3px}#gw select{margin-left:6px}#pb{font-size:12px;margin-top:6px;padding:6px 8px;border:1px solid var(--ln);border-radius:6px}#pb:empty{display:none}#eew{font-size:12px;margin-top:6px}#hint{color:var(--mu);font-size:12px;margin-top:6px}#rep{margin-top:6px;font-size:12px}
 </style></head><body>
-<header><b id="ttl">Earth Hazard Lab</b><span style="font-size:10px;background:#0004;padding:2px 5px;border-radius:4px;margin-left:6px;font-weight:normal;opacity:.8">b38</span><button id="nvb">EEW console</button>
+<header><b id="ttl">Earth Hazard Lab</b><span style="font-size:10px;background:#0004;padding:2px 5px;border-radius:4px;margin-left:6px;font-weight:normal;opacity:.8">b39</span><button id="nvb">EEW console</button>
 <div class="seg" id="lay"><button class="on" data-l="0">Terrain</button><button data-l="1">Climate</button></div>
 <label><input type="checkbox" id="fl" checked> Faults</label><label><input type="checkbox" id="ct" checked> Cities</label><label><input type="checkbox" id="vr" checked> Rivers &amp; volcanoes</label><label><input type="checkbox" id="al" checked> Alerts</label><label><input type="checkbox" id="rd"> Touch read mode</label></header>
 <div id="map"><div id="wvsel" style="display:none;position:absolute;left:6px;right:6px;bottom:6px;max-width:380px;z-index:8;background:rgba(10,18,24,.94);border:1px solid #2b3d49;border-radius:10px;padding:8px 10px;font:12px system-ui;color:#e5ecef"></div><div id="modeb" style="position:fixed;top:8px;left:8px;z-index:9;padding:3px 9px;border-radius:12px;font:bold 11px system-ui;letter-spacing:.04em;pointer-events:none;background:#ffb020;color:#000;border:1.5px solid #000">SIMULATION</div><canvas id="cv"></canvas><div id="legend"><b>Map key</b><br><span class="sw" style="background:#ff3d5a"></span>Subduction fault<br><span class="sw" style="background:#ffb020"></span>Transform fault<br><span class="sw" style="background:#ff7a1a"></span>Convergent fault<br><span class="sw" style="background:#b36bff"></span>Rift / ridge<br><span class="sw" style="background:#4cc9f0"></span>P-wave front<br><span class="sw" style="background:#ff9f1c"></span>S-wave front</div><div id="info">Tap the map for local data</div><div id="bn" style="display:none"></div><div id="tip"></div><div id="ld">Building Earth…</div></div>
@@ -62,7 +62,7 @@ details{margin-top:8px}summary{cursor:pointer;color:var(--mu)}#legend{position:a
 <div id="hint">Click the map to place an epicenter. Fault traces are simplified geographic approximations; the Tohoku 2011 interface trace is a separate shallow megathrust reference, not the Japan Trench axis. Set focal depth to compare shallow and deep events. Offshore M6.8+ events may generate a tsunami. Hover anywhere to read elevation, wave heights and floods; on touch screens, tap. Drag to pan, scroll or pinch to zoom.</div><div id="pb"></div><canvas id="cp" width="600" height="80" style="width:100%;height:56px;display:none;margin-top:4px"></canvas><div id="eew"></div><div id="rep"></div><div id="bgp" style="font-size:12px;margin-top:6px"></div><div id="gw" class="hide"><label>Tide gauge<select id="gs"></select></label><canvas id="gc" width="600" height="90" style="width:100%;height:60px"></canvas></div>
 </section>
 <script>
-const BUILD="b38";window.addEventListener("error",ev=>{const d=document.getElementById("diag");if(d)d.textContent="Build "+BUILD+" · last error: "+ev.message+" (line "+ev.lineno+")"});
+const BUILD="b39";window.addEventListener("error",ev=>{const d=document.getElementById("diag");if(d)d.textContent="Build "+BUILD+" · last error: "+ev.message+" (line "+ev.lineno+")"});
 
 const RZ=4,HF=3,W=360*RZ,H=180*RZ,N=W*H,CS=111.2/RZ,sq=x=>x*x,$=id=>document.getElementById(id);
 const LAND=[`-168,66 -162,70 -156,71.5 -141,70 -128,70 -115,68 -95,72 -85,70 -82,66 -90,64 -94,59 -92,57 -85,55 -80,51 -78,56 -77,62 -70,61 -65,60 -62,56 -56,52 -60,47 -66,45 -70,43 -70,41.5 -74,40 -76,37 -76,35 -81,31 -80,26 -82,27 -84,30 -90,29 -94,29.5 -97,27 -97,22 -95,19 -91,19 -90,21 -87,21 -88,16 -84,15 -83,11 -80,9 -77,8.5 -80,7.5 -84,9 -86,12 -91,14 -96,15.5 -105,20 -109,25 -114,31 -117,33 -120,34.5 -122,37 -124,40 -124,46 -123,48.5 -127,51 -131,55 -135,58 -140,60 -148,60.5 -152,58 -158,56.5 -162,55 -158,58.5 -165,61 -165,64`,
@@ -1040,14 +1040,14 @@ const dn=u>>>30,sw=u&0x3fffffff,fld=(n,b)=>{for(let j=n-1;j>=0;j--)d.push(sx((sw
 if(nib===2){if(dn===1)fld(1,30);else if(dn===2)fld(2,15);else if(dn===3)fld(3,10)}else{if(dn===0)fld(5,6);else if(dn===1)fld(6,5);else if(dn===2)fld(7,4)}}}
 const o=new Array(Math.min(ns,d.length));if(!o.length)return o;o[0]=x0;for(let i=1;i<o.length;i++)o[i]=o[i-1]+d[i];return o}
 function wvRecs(buf,filter){const dv=new DataView(buf),u8=new Uint8Array(buf),M=new Map(),tx=(a,n)=>{let o="";for(let i=0;i<n;i++){const c=u8[a+i];if(c>32&&c<127)o+=String.fromCharCode(c)}return o};let off=0;
-while(off+40<=buf.byteLength){if(u8[off]===77&&u8[off+1]===83&&u8[off+2]===3){const sl=u8[off+33],xl=dv.getUint16(off+34,true),dl=dv.getUint32(off+36,true),rl3=40+sl+xl+dl;if(off+rl3>buf.byteLength)break;let sid="";for(let i=0;i<sl;i++)sid+=String.fromCharCode(u8[off+40+i]);const P=sid.replace(/^FDSN:/,"").split("_");let key;if(P.length>=6)key=P[0]+"."+P[1]+"."+(P[2]||"--")+"."+P[3]+P[4]+P[5];else key=sid;if(filter&&!filter.has(key)){off+=rl3;continue}
+while(off+40<=buf.byteLength){if(u8[off]===77&&u8[off+1]===83&&u8[off+2]===3){const sl=u8[off+33],xl=dv.getUint16(off+34,true),dl=dv.getUint32(off+36,true),rl3=40+sl+xl+dl;if(off+rl3>buf.byteLength)break;let sid="";for(let i=0;i<sl;i++)sid+=String.fromCharCode(u8[off+40+i]);const P=sid.replace(/^FDSN:/,"").split("_");let key;if(P.length>=6)key=P[0]+"."+P[1]+"."+(P[2]||"--")+"."+P[3]+P[4]+P[5];else key=sid;if(filter&&!filter.has(key)){off+=rl3;continue}if(filter&&!filter.has(key)){off+=rl3;continue}
 let sr=dv.getFloat64(off+16,true);if(sr<0)sr=-1/sr;const n3=dv.getUint32(off+24,true),e3=u8[off+15],ds=off+40+sl+xl,t3=Date.UTC(dv.getUint16(off+8,true),0,1)+((dv.getUint16(off+10,true)-1)*86400+u8[off+12]*3600+u8[off+13]*60+u8[off+14])*1000+dv.getUint32(off+4,true)/1e6;let v3=[];
 try{if(e3===11)v3=wvSteim(dv,ds,dl,false,2,n3);else if(e3===10)v3=wvSteim(dv,ds,dl,false,1,n3);else if(e3===1)for(let i=0;i<n3;i++)v3.push(dv.getInt16(ds+2*i,true));else if(e3===3)for(let i=0;i<n3;i++)v3.push(dv.getInt32(ds+4*i,true));else if(e3===4)for(let i=0;i<n3;i++)v3.push(dv.getFloat32(ds+4*i,true));else if(e3===5)for(let i=0;i<n3;i++)v3.push(dv.getFloat64(ds+8*i,true))}catch(e){v3=[]}
 if(sr>0&&v3.length){let a=M.get(key);if(!a)M.set(key,a=[]);a.push({t:t3,r:sr,v:v3})}off+=rl3;continue}
 if(off+64>buf.byteLength)break;let le=false,yr=dv.getUint16(off+20,false);if(yr<1900||yr>2200){yr=dv.getUint16(off+20,true);le=true;if(yr<1900||yr>2200)break}
 const key=tx(off+18,2)+"."+tx(off+8,5)+"."+(tx(off+13,2)||"--")+"."+tx(off+15,3),doy=dv.getUint16(off+22,le),hh=u8[off+24],mm=u8[off+25],ss=u8[off+26],fr=dv.getUint16(off+28,le),ns=dv.getUint16(off+30,le),f=dv.getInt16(off+32,le),m=dv.getInt16(off+34,le),act=u8[off+36],tc=dv.getInt32(off+40,le),dof=dv.getUint16(off+44,le);let b=dv.getUint16(off+46,le),enc=0,wo=1,rl=0,k=0;
 while(b&&k++<8&&off+b+8<=buf.byteLength){const ty=dv.getUint16(off+b,le),nx=dv.getUint16(off+b+2,le);if(ty===1000){enc=u8[off+b+4];wo=u8[off+b+5];rl=1<<u8[off+b+6];break}b=nx}
-if(!rl)rl=512;if(off+rl>buf.byteLength)rl=buf.byteLength-off;if(filter&&!filter.has(key)){off+=rl;continue}
+if(!rl)rl=512;if(off+rl>buf.byteLength)rl=buf.byteLength-off;if(filter&&!filter.has(key)){off+=rl;continue}if(filter&&!filter.has(key)){off+=rl;continue}
 const r=f>0?(m>0?f*m:f<0?0:-f/m):(m>0?-m/f:1/(f*m));if(!r||!isFinite(r)){off+=rl;continue}
 const t=Date.UTC(yr,0,1)+((doy-1)*86400+hh*3600+mm*60+ss)*1000+fr*.1+((act&2)?0:tc*.1),dle=wo===0;let v=[];
 try{if(enc===11)v=wvSteim(dv,off+dof,rl-dof,dle,2,ns);else if(enc===10)v=wvSteim(dv,off+dof,rl-dof,dle,1,ns);else if(enc===1)for(let i=0;i<ns;i++)v.push(dv.getInt16(off+dof+2*i,dle));else if(enc===3)for(let i=0;i<ns;i++)v.push(dv.getInt32(off+dof+4*i,dle));else if(enc===4)for(let i=0;i<ns;i++)v.push(dv.getFloat32(off+dof+4*i,dle));else if(enc===5)for(let i=0;i<ns;i++)v.push(dv.getFloat64(off+dof+8*i,dle))}catch(e){v=[]}
@@ -1312,34 +1312,44 @@ if(/^ERROR/.test(m.head)){const nets=[...new Set(WV.ST.map(s=>s.net))].join("|")
 let p=await send("POSITION AFTER "+Math.round(Math.max(S_.lastHp||0,(Date.now()-Math.min(WV.win,WV.ST.length>1500?76:110)*1000)*1000)));if(/^ERROR/.test(p.head)){p=await send("POSITION SET LATEST");if(/^ERROR/.test(p.head))throw new Error("server refused the start position: "+p.head.slice(0,40))}
 ws.send(wvFrame("STREAM"));S_.st="streaming";S_.since=Date.now();S_.dl=null;S_.last=Date.now()}catch(e){S_.err=e.message||String(e);try{ws.close()}catch(_){}}}}
 function wvPacket(f){
-        const S_=WV.S;S_.pk++;S_.last=Date.now();
-        const hd=f.head.split(" "),hp=+hd[3];
-        if(isFinite(hp))S_.lastHp=Math.max(S_.lastHp||0,hp);
-        
-        // Fast header filter: drop unwanted stations before decoding (stream ids look like FDSN:NET_STA_LOC_B_S_C/MSEED3 or NET_STA_LOC_CHA/MSEED)
-        if(!S_.nopf&&WV.kmap){
-          const sid=(hd[1]||"").replace(/^FDSN:/,"").replace(/\/.*$/,"").split("_");let k0=null;
-          if(sid.length>=6)k0=sid[0]+"."+sid[1]+"."+(sid[2]||"--")+"."+sid[3]+sid[4]+sid[5];
-          else if(sid.length===4)k0=sid[0]+"."+sid[1]+"."+(sid[2]||"--")+"."+sid[3];
-          if(S_.pk>300&&!S_.dec)S_.nopf=1;
-          else if(k0&&!WV.kmap.has(k0)){S_.nm=(S_.nm||0)+1;S_.um=S_.um||k0;return}
-        }
-        
-        let M;try{M=wvRecs(f.data.slice().buffer, WV.kmap)}catch(e){return}
-        if(!S_.fmt)S_.fmt=f.head.slice(0,70)+" | "+(f.data[0]===77?"mseed3":"mseed2?");
-        for(const[k,R]of M){
-          S_.dec=(S_.dec||0)+R.length;
-          const st=WV.kmap&&WV.kmap.get(k);
-          if(!st){S_.um=S_.um||k;S_.nm=(S_.nm||0)+1;continue}
-          st.got=1;
-          {const q1=R[R.length-1],l1=Date.now()-(q1.t+q1.v.length/q1.r*1000);S_.dl=S_.dl==null?l1:S_.dl*.97+l1*.03}
-          if(Date.now()-S_.since>45000){const q0=R[R.length-1],lg=Date.now()-(q0.t+q0.v.length/q0.r*1000);st.lag=st.nlag?st.lag*.85+lg*.15:lg;st.nlag=(st.nlag||0)+1}
-          if(!S_.d1){const q=R[0];S_.d1=k+" "+q.r+"Hz n="+q.v.length+" age="+Math.round((Date.now()-q.t)/1000)+"s v0="+q.v[0]}
-          (st.q||(st.q=[])).push(...R);
-          if(st.q.length>90)st.q.splice(0,st.q.length-90);
-        }
-      }
-      function wvRestream(){const S_=WV.S;if(!WV.ws)return;S_.lastHp=0;S_.dl=null;for(const s of WV.ST)s.q=[];try{WV.ws.close()}catch(e){}}
+  const S_=WV.S;S_.pk++;S_.last=Date.now();
+  const hd=f.head.split(" "),hp=+hd[3];
+  if(isFinite(hp))S_.lastHp=Math.max(S_.lastHp||0,hp);
+  
+  const h1=hd[1]||"";
+  if(WV.kmap&&h1.length>10){
+    let sid=h1;
+    const slash=h1.indexOf("/");
+    if(slash>0) sid=h1.slice(0,slash);
+    if(sid.startsWith("FDSN:")) sid=sid.slice(5);
+    
+    const P=sid.split("_");
+    let k0;
+    if(P.length>=6) k0=P[0]+"."+P[1]+"."+(P[2]||"--")+"."+P[3]+P[4]+P[5];
+    else if(P.length===4) k0=P[0]+"."+P[1]+"."+(P[2]||"--")+"."+P[3];
+    else k0=sid.replace(/_/g,".");
+    
+    if(!WV.kmap.has(k0)){
+      S_.nm=(S_.nm||0)+1;S_.um=S_.um||k0;
+      return; 
+    }
+  }
+  
+  let M;try{M=wvRecs(f.data.slice().buffer, WV.kmap)}catch(e){return}
+  if(!S_.fmt)S_.fmt=f.head.slice(0,70)+" | "+(f.data[0]===77?"mseed3":"mseed2?");
+  for(const[k,R]of M){
+    S_.dec=(S_.dec||0)+R.length;
+    const st=WV.kmap&&WV.kmap.get(k);
+    if(!st){S_.um=S_.um||k;S_.nm=(S_.nm||0)+1;continue}
+    st.got=1;
+    {const q1=R[R.length-1],l1=Date.now()-(q1.t+q1.v.length/q1.r*1000);S_.dl=S_.dl==null?l1:S_.dl*.97+l1*.03}
+    if(Date.now()-S_.since>45000){const q0=R[R.length-1],lg=Date.now()-(q0.t+q0.v.length/q0.r*1000);st.lag=st.nlag?st.lag*.85+lg*.15:lg;st.nlag=(st.nlag||0)+1}
+    if(!S_.d1){const q=R[0];S_.d1=k+" "+q.r+"Hz n="+q.v.length+" age="+Math.round((Date.now()-q.t)/1000)+"s v0="+q.v[0]}
+    (st.q||(st.q=[])).push(...R);
+    if(st.q.length>90)st.q.splice(0,st.q.length-90);
+  }
+}
+function wvRestream(){const S_=WV.S;if(!WV.ws)return;S_.lastHp=0;S_.dl=null;for(const s of WV.ST)s.q=[];try{WV.ws.close()}catch(e){}}
 function wvFlush(){if(!WV.on||WV.mode!=="ws")return;const t=Date.now(),S_=WV.S;let any=0;for(const st of WV.ST)if(st.res&&t-st.res.end>300000&&!(st.q&&st.q.length)){st.res=null;st.buf=null}const rr0=WV.rr||0,NN=WV.ST.length,t1=performance.now(),BUD=NN>2000?300:130;let qn=0,stop=-1;WV.weakOff=NN>1500||(S_.qn||0)>150;for(let pass=0;pass<2;pass++)for(let c=0;c<NN;c++){const ii=(rr0+c)%NN,st=WV.ST[ii],q=st.q;if(!q||!q.length)continue;if(pass===0&&st.res)continue;if(stop>=0){qn++;continue}if(performance.now()-t1>BUD){stop=ii;qn++;continue}st.q=[];any++;const A=wvAsm(q);S_.maxn=Math.max(S_.maxn||0,A.vals.length);wvFinish(st,A);if(st.err){S_.fn=(S_.fn||0)+1;S_.fe=st.err}}WV.rr=stop>=0?stop:0;S_.qn=qn;
 const BIG=WV.ST.length>1500;if(S_.st==="streaming"&&WV.ST.length>36&&t-S_.since>(BIG?50000:120000)&&(S_.dl>(BIG?35000:70000)||(BIG&&t-S_.since>90000&&WV.ok<WV.ST.length*.25))){WV.note="stream lagged; skipping backlog and resuming with the same "+WV.ST.length+" stations";wvRestream();return}
 if(S_.st==="streaming"){if(t-S_.since>80000&&WV.ok===0&&S_.pk>0){wvFallback("stream data not usable: "+(S_.d1||"no station matched")+(S_.fe?" · err "+S_.fe:"")+" · "+(S_.dec||0)+" records");return}if(t-Math.max(S_.last,S_.since)>45000){try{WV.ws&&WV.ws.close()}catch(e){}}}
